@@ -17,7 +17,7 @@ type Planet struct {
 func (planet *Planet) SavePlanet() (*Planet, error) {
 	err := DB.Create(&planet).Error
 	if err != nil {
-		return &Planet {}, err
+		return &Planet{}, err
 	}
 	return planet, nil
 }
@@ -29,7 +29,7 @@ func (planet *Planet) BeforeSave() error {
 	}
 
 	planet.Password = string(hashedPassword)
-	planet.PlanetId =  html.EscapeString(strings.TrimSpace(planet.PlanetId))
+	planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
 
 	return nil
 }
