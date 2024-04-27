@@ -9,19 +9,13 @@ type InviteCode struct {
 
 func (inviteCode *InviteCode) Save() (*InviteCode, error) {
 	err := DB.Create(&inviteCode).Error
-	if err != nil {
-		return &InviteCode{}, err
-	}
-	return inviteCode, nil
+	return inviteCode, err
 }
 
 func (invite *InviteCode) GetAll() ([]*InviteCode, error) {
 	invites := []*InviteCode{}
 	err := DB.Find(invites).Error
-	if err != nil {
-		return []*InviteCode{}, err
-	}
-	return invites, nil
+	return invites, err
 }
 
 func (invite *InviteCode) DeleteOne() error {
