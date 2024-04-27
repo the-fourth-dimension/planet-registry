@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/utils"
 )
@@ -18,22 +21,72 @@ type CredentialsWithCode struct {
 	Code string `json:"code" binding:"required"`
 }
 
+// TODO
+// -> USE Transaction in signup
+// -> separate methods for models into repositories
 func Signup(ctx *gin.Context) {
-	var input CredentialsWithCode
 
-	if err := ctx.ShouldBindJSON(&input); err != nil {
+	config, err := models.GetConfig()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Fatalln("server config not set!")
+		}
+		return
+	}
+
+	planet := models.Planet{}
+	if config.InviteOnly {
+		var input CredentialsWithCode
+		if err := ctx.ShouldBindJSON(&input); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		inviteCode := models.InviteCode{Code: input.Code}
+		_, err := inviteCode.FindOne()
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"error": "Incorrect Code",
+				})
+				return
+			}
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+		err = inviteCode.DeleteOne()
+		if err := ctx.ShouldBindJSON(&input); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		planet.PlanetId = input.PlanetId
+		planet.Password = input.Password
+	} else {
+		var input Credentials
+		if err := ctx.ShouldBindJSON(&input); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		planet.PlanetId = input.PlanetId
+		planet.Password = input.Password
+	}
+
+	err = planet.BeforeSave()
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	planet := models.Planet{}
-
-	planet.PlanetId = input.PlanetId
-	planet.Password = input.Password
-
-	planet.BeforeSave()
-	_, err := planet.Save()
+	err = planet.Save()
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

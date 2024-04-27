@@ -18,6 +18,11 @@ func (invite *InviteCode) GetAll() ([]*InviteCode, error) {
 	return invites, err
 }
 
+func (invite *InviteCode) FindOne() (*InviteCode, error) {
+	err := DB.First(invite).Error
+	return invite, err
+}
+
 func (invite *InviteCode) DeleteOne() error {
 	err := DB.Delete(invite).Error
 	return err

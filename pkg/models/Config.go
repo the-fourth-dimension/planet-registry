@@ -9,6 +9,6 @@ type Config struct {
 
 func GetConfig() (*Config, error) {
 	config := Config{}
-	err := DB.Find(&config).Error
+	err := DB.First(&config).Error
 	return &config, err
 }
