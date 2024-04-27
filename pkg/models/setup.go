@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/lib/pq"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
 )
 
