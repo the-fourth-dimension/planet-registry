@@ -34,6 +34,7 @@ func Signup(ctx *gin.Context) {
 	planet.PlanetId = input.PlanetId
 	planet.Password = input.Password
 
+	planet.BeforeSave()
 	_, err := planet.SavePlanet()
 
 	if err != nil {
