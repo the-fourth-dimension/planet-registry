@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/the_fourth_dimension/planet_registry/middlewares"
-	"github.com/the_fourth_dimension/planet_registry/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
-	"github.com/the_fourth_dimension/planet_registry/routes"
+	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
+	"github.com/the_fourth_dimension/planet_registry/pkg/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/routes"
 )
 
 func main() {

@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/the_fourth_dimension/planet_registry/models"
-	"github.com/the_fourth_dimension/planet_registry/utils"
+	"github.com/the_fourth_dimension/planet_registry/pkg/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/utils"
 )
 
 type SignupInput struct {
 	PlanetId string `json:"planetId" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Code string `json:"code" binding:"required"`
+	Code     string `json:"code" binding:"required"`
 }
 
 type LoginInput struct {
@@ -23,7 +23,7 @@ func Signup(ctx *gin.Context) {
 	var input SignupInput
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H {
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
@@ -38,10 +38,10 @@ func Signup(ctx *gin.Context) {
 	_, err := planet.SavePlanet()
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H {
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		return 
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -54,7 +54,7 @@ func Login(ctx *gin.Context) {
 	var input LoginInput
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H {
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
@@ -66,15 +66,15 @@ func Login(ctx *gin.Context) {
 	planet.Password = input.Password
 
 	err := utils.LoginCheck(planet.PlanetId, planet.Password)
-	
-	if err != nil  {
+
+	if err != nil {
 		ctx.Status(403)
-		ctx.JSON(http.StatusNotFound, gin.H {
+		ctx.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H {
-		"planet": planet, 
-	})	
+	ctx.JSON(http.StatusOK, gin.H{
+		"planet": planet,
+	})
 }

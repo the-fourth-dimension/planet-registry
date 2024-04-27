@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/the_fourth_dimension/planet_registry/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,8 +12,8 @@ func verifyPassword(password, hashedPassword string) error {
 func LoginCheck(planetId string, password string) error {
 	var err error
 
-	planet := models.Planet {}
-	err = models.DB.Model(models.Planet {}).Where("planetId = ?", planetId).Take(&planet).Error
+	planet := models.Planet{}
+	err = models.DB.Model(models.Planet{}).Where("planetId = ?", planetId).Take(&planet).Error
 
 	if err != nil {
 		return err
