@@ -8,19 +8,18 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/utils"
 )
 
-type SignupInput struct {
+type Credentials struct {
 	PlanetId string `json:"planetId" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Code     string `json:"code" binding:"required"`
 }
 
-type LoginInput struct {
-	PlanetId string `json:"planetId" binding:"required"`
-	Password string `json:"password" binding:"required"`
+type CredentialsWithCode struct {
+	Credentials
+	Code string `json:"code" binding:"required"`
 }
 
 func Signup(ctx *gin.Context) {
-	var input SignupInput
+	var input CredentialsWithCode
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -28,14 +27,13 @@ func Signup(ctx *gin.Context) {
 		})
 		return
 	}
-
 	planet := models.Planet{}
 
 	planet.PlanetId = input.PlanetId
 	planet.Password = input.Password
 
 	planet.BeforeSave()
-	_, err := planet.SavePlanet()
+	_, err := planet.Save()
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -51,7 +49,7 @@ func Signup(ctx *gin.Context) {
 }
 
 func Login(ctx *gin.Context) {
-	var input LoginInput
+	var input Credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

@@ -14,7 +14,7 @@ type Planet struct {
 	Password string `gorm:"size:255;not null" json:"password"`
 }
 
-func (planet *Planet) SavePlanet() (*Planet, error) {
+func (planet *Planet) Save() (*Planet, error) {
 	err := DB.Create(&planet).Error
 	if err != nil {
 		return &Planet{}, err
