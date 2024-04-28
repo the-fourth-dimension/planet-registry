@@ -10,9 +10,9 @@ import (
 
 func main() {
 	env.LoadEnv()
-	models.ConnectDatabase()
+	db := models.ConnectDatabase()
 
-	router := routes.NewRouter()
+	router := routes.NewRouter(db)
 
 	router.RegisterMiddlewares()
 	router.RegisterRoutes()

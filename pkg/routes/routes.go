@@ -14,6 +14,7 @@ func (r *Router) RegisterMiddlewares() {
 	r.Engine.Use(middlewares.LoggerMiddleware())
 }
 
+// [ ] error logger middleware for gin
 func (r *Router) RegisterRoutes() {
 
 	r.Engine.GET("/health", func(ctx *gin.Context) {
@@ -21,11 +22,9 @@ func (r *Router) RegisterRoutes() {
 	})
 
 	r.Engine.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, "Hi")
+		ctx.Status(http.StatusOK)
 	})
 
-	r.Engine.POST("/auth/signup", handlers.Signup)
-
-	r.Engine.POST("/auth/login", handlers.Login)
-
+	authHandler := handlers.NewAuthHandler(r.Engine, r.DB)
+	authHandler.RegisterRouter()
 }
