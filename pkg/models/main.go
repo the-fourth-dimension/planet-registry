@@ -28,7 +28,7 @@ func ConnectDatabase() *gorm.DB {
 		fmt.Println("database connection successfull", db_driver)
 	}
 
-	DB.AutoMigrate()
+	DB.AutoMigrate(&Admin{}, &Config{}, &InviteCode{}, &Planet{})
 
 	return DB
 }
