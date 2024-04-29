@@ -5,16 +5,6 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
-type Credentials struct {
-	PlanetId string `json:"planetId" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
-type CredentialsWithCode struct {
-	Credentials
-	Code string `json:"code" binding:"required"`
-}
-
 type AuthHandler struct {
 	PlanetRepository     repositories.PlanetRepository
 	InviteCodeRepository repositories.InviteCodeRepository

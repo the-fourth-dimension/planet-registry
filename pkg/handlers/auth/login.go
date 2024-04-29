@@ -8,10 +8,11 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
 func (h *AuthHandler) postLogin(ctx *gin.Context) {
-	var input Credentials
+	var input types.Credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
