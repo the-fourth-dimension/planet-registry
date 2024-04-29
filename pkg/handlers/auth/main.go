@@ -12,8 +12,6 @@ type AuthHandler struct {
 	Router               *gin.Engine
 }
 
-// [ ] USE Transaction in signup
-// [x] separate methods for models into repositories
 func (h *AuthHandler) RegisterRouter() {
 	auth := h.Router.Group("/auth")
 	auth.POST("/signup", h.postSignUp)

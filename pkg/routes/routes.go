@@ -14,7 +14,6 @@ func (r *Router) RegisterMiddlewares() {
 	r.Engine.Use(middlewares.LoggerMiddleware())
 }
 
-// [ ] error logger middleware for gin
 func (r *Router) RegisterRoutes() {
 
 	r.Engine.GET("/health", func(ctx *gin.Context) {
