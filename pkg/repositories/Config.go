@@ -21,6 +21,6 @@ func (r *ConfigRepository) Save(data *models.Config) RepositoryResult[models.Con
 
 func (r *ConfigRepository) FindFirst(query *models.Config) RepositoryResult[models.Config] {
 	var data models.Config
-	err := r.db.Find(data, query).Error
+	err := r.db.Find(&data, query).Error
 	return RepositoryResult[models.Config]{Result: &data, Error: err}
 }

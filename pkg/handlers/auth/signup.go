@@ -40,7 +40,7 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 		if inviteCode.Error != nil {
 			if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
 				ctx.JSON(http.StatusBadRequest, gin.H{
-					"error": "Incorrect Code",
+					"error": "Invalid Code",
 				})
 				return
 			}

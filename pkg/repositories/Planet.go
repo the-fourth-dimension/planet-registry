@@ -27,6 +27,6 @@ func (r *PlanetRepository) FindAll(query *models.Planet) RepositoryResult[[]mode
 
 func (r *PlanetRepository) FindFirst(query *models.Planet) RepositoryResult[models.Planet] {
 	var data models.Planet
-	err := r.db.Find(data, query).Error
+	err := r.db.Find(&data, query).Error
 	return RepositoryResult[models.Planet]{Result: &data, Error: err}
 }
