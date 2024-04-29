@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 
+	"github.com/the_fourth_dimension/planet_registry/pkg/database"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
-	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/routes"
 )
 
 func main() {
 	env.LoadEnv()
-	db := models.ConnectDatabase()
-
-	router := routes.NewRouter(db)
+	db := database.ConnectDatabase()
+	db.MigrateModels()
+	db.PopulateConfig()
+	router := routes.NewRouter(db.DB)
 
 	router.RegisterMiddlewares()
 	router.RegisterRoutes()

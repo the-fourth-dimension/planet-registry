@@ -21,6 +21,6 @@ func (r *AdminRepository) Save(data *models.Admin) RepositoryResult[models.Admin
 
 func (r *AdminRepository) FindFirst(query *models.Admin) RepositoryResult[models.Admin] {
 	var data models.Admin
-	err := r.db.Find(data, query).Error
+	err := r.db.Find(&data, query).Error
 	return RepositoryResult[models.Admin]{Result: &data, Error: err}
 }

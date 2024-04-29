@@ -21,7 +21,7 @@ func (r *InviteCodeRepository) Save(data *models.InviteCode) RepositoryResult[mo
 
 func (r *InviteCodeRepository) FindFirst(query *models.InviteCode) RepositoryResult[models.InviteCode] {
 	var data models.InviteCode
-	err := r.db.Find(data, query).Error
+	err := r.db.Find(&data, query).Error
 	return RepositoryResult[models.InviteCode]{Result: &data, Error: err}
 }
 
