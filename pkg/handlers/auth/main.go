@@ -1,21 +1,24 @@
-package handlers_auth
+package AuthHandler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
-type AuthHandler struct {
-	PlanetRepository     repositories.PlanetRepository
-	InviteCodeRepository repositories.InviteCodeRepository
-	ConfigRepository     repositories.ConfigRepository
-	Router               *gin.Engine
-	ExecuteTransaction   func(func(*gorm.DB) bool) bool
+type authHandler struct {
+	router *gin.Engine
+	ctx    *repositories.Context
 }
 
-func (h *AuthHandler) RegisterRouter() {
-	auth := h.Router.Group("/auth")
+func (h *authHandler) RegisterRouter() {
+	auth := h.router.Group("/auth")
 	auth.POST("/signup", h.postSignUp)
 	auth.POST("/login", h.postLogin)
+}
+
+func New(router *gin.Engine, ctx *repositories.Context) *authHandler {
+	return &authHandler{
+		router: router,
+		ctx:    ctx,
+	}
 }

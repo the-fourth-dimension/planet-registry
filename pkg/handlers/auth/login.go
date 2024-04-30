@@ -1,4 +1,4 @@
-package handlers_auth
+package AuthHandler
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
-func (h *AuthHandler) postLogin(ctx *gin.Context) {
+func (h *authHandler) postLogin(ctx *gin.Context) {
 	var input types.Credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -24,7 +24,7 @@ func (h *AuthHandler) postLogin(ctx *gin.Context) {
 
 	planet.PlanetId = input.PlanetId
 
-	existingPlanetResult := h.PlanetRepository.FindFirst(&planet)
+	existingPlanetResult := h.ctx.PlanetRepository.FindFirst(&planet)
 	if existingPlanetResult.Error != nil {
 		if errors.Is(existingPlanetResult.Error, gorm.ErrRecordNotFound) {
 			ctx.Error(HttpError.NewHttpError("Not found", "planetId: "+planet.PlanetId, http.StatusNotFound))

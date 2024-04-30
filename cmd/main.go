@@ -13,7 +13,7 @@ func main() {
 	db := database.ConnectDatabase()
 	db.MigrateModels()
 	db.PopulateConfig()
-	router := routes.NewRouter(db)
+	router := routes.NewRouter(db.DB)
 
 	router.RegisterMiddlewares()
 	router.RegisterRoutes()

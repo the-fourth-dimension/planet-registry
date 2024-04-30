@@ -17,21 +17,6 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func (d *Database) ExecuteTransaction(transaction func(*gorm.DB) bool) bool {
-	err := d.DB.Transaction(
-		func(tx *gorm.DB) error {
-			if transaction(d.DB) {
-				return nil
-			}
-			return errors.New("Transaction Failed")
-		},
-	)
-	if err == nil {
-		return false
-	}
-	return true
-}
-
 func ConnectDatabase() *Database {
 
 	db_driver := env.GetEnv(env.DB_DRIVER)

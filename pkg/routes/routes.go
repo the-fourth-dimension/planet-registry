@@ -5,8 +5,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/the_fourth_dimension/planet_registry/pkg/handlers"
+	AuthHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/auth"
 	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
+	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
 func (r *Router) RegisterMiddlewares() {
@@ -24,7 +25,7 @@ func (r *Router) RegisterRoutes() {
 	r.Engine.GET("/", func(ctx *gin.Context) {
 		ctx.Status(http.StatusOK)
 	})
-
-	authHandler := handlers.NewAuthHandler(r.Engine, r.DB)
+	ctx := repositories.NewContext(r.DB)
+	authHandler := AuthHandler.New(r.Engine, ctx)
 	authHandler.RegisterRouter()
 }

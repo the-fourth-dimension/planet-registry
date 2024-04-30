@@ -1,4 +1,4 @@
-package handlers_auth
+package AuthHandler
 
 import (
 	"errors"
@@ -15,9 +15,8 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
-func (h *AuthHandler) postSignUp(ctx *gin.Context) {
-	findConfigResult := h.ConfigRepository.FindFirst(&models.Config{})
-
+func (h *authHandler) postSignUp(ctx *gin.Context) {
+	findConfigResult := h.ctx.ConfigRepository.FindFirst(&models.Config{})
 	if findConfigResult.Error != nil {
 		if errors.Is(findConfigResult.Error, gorm.ErrRecordNotFound) {
 			log.Fatalln("server config not set!")
@@ -35,8 +34,8 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 			return
 		}
 
-		success := h.ExecuteTransaction(func(tx *gorm.DB) bool {
-			inviteCode := h.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
+		success := h.ctx.ExecuteTransaction(func(tx *gorm.DB) bool {
+			inviteCode := h.ctx.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
 			if inviteCode.Error != nil {
 				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
 					ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
@@ -45,7 +44,7 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
 				return false
 			}
-			deleteInviteResult := h.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
+			deleteInviteResult := h.ctx.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
 			if deleteInviteResult.Error != nil {
 				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
 				return false
@@ -78,7 +77,7 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 	}
 	planet.Password = hashedPassword
 	planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
-	savePlanetResult := h.PlanetRepository.Save(&planet)
+	savePlanetResult := h.ctx.PlanetRepository.Save(&planet)
 
 	if savePlanetResult.Error != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, savePlanetResult.Error)
