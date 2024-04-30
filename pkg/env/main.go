@@ -16,6 +16,7 @@ const (
 	DB_PASSWORD
 	DB_NAME
 	DB_PORT
+	JWT_SECRET
 )
 
 var keys = []string{
@@ -26,6 +27,7 @@ var keys = []string{
 	"DB_PASSWORD",
 	"DB_NAME",
 	"DB_PORT",
+	"JWT_SECRET",
 }
 
 func LoadEnv() {
