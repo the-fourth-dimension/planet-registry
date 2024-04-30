@@ -2,6 +2,7 @@ package handlers_auth
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
@@ -10,6 +11,7 @@ type AuthHandler struct {
 	InviteCodeRepository repositories.InviteCodeRepository
 	ConfigRepository     repositories.ConfigRepository
 	Router               *gin.Engine
+	ExecuteTransaction   func(func(*gorm.DB) bool) bool
 }
 
 func (h *AuthHandler) RegisterRouter() {

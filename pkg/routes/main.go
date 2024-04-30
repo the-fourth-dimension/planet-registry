@@ -2,15 +2,15 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"github.com/the_fourth_dimension/planet_registry/pkg/database"
 )
 
 type Router struct {
 	Engine *gin.Engine
-	DB     *gorm.DB
+	DB     *database.Database
 }
 
-func NewRouter(db *gorm.DB) *Router {
+func NewRouter(db *database.Database) *Router {
 	return &Router{
 		Engine: gin.Default(),
 		DB:     db,

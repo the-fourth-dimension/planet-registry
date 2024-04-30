@@ -35,26 +35,33 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 			return
 		}
 
-		inviteCode := h.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
-		if inviteCode.Error != nil {
-			if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
-				ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
-				return
+		success := h.ExecuteTransaction(func(tx *gorm.DB) bool {
+			inviteCode := h.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
+			if inviteCode.Error != nil {
+				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
+					ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
+					return false
+				}
+				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
+				return false
 			}
-			ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
+			deleteInviteResult := h.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
+			if deleteInviteResult.Error != nil {
+				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
+				return false
+			}
+			if err := ctx.ShouldBindJSON(&input); err != nil {
+				ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
+				return false
+			}
+			planet.PlanetId = input.PlanetId
+			planet.Password = input.Password
+			return true
+		})
+
+		if !success {
 			return
 		}
-		deleteInviteResult := h.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
-		if deleteInviteResult.Error != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
-			return
-		}
-		if err := ctx.ShouldBindJSON(&input); err != nil {
-			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
-			return
-		}
-		planet.PlanetId = input.PlanetId
-		planet.Password = input.Password
 	} else {
 		var input types.Credentials
 		if err := ctx.ShouldBindJSON(&input); err != nil {
