@@ -13,11 +13,26 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
-type database struct {
+type Database struct {
 	DB *gorm.DB
 }
 
-func ConnectDatabase() *database {
+func (d *Database) ExecuteTransaction(transaction func(*gorm.DB) bool) bool {
+	err := d.DB.Transaction(
+		func(tx *gorm.DB) error {
+			if transaction(d.DB) {
+				return nil
+			}
+			return errors.New("Transaction Failed")
+		},
+	)
+	if err == nil {
+		return false
+	}
+	return true
+}
+
+func ConnectDatabase() *Database {
 
 	db_driver := env.GetEnv(env.DB_DRIVER)
 	db_host := env.GetEnv(env.DB_HOST)
@@ -36,14 +51,14 @@ func ConnectDatabase() *database {
 		fmt.Println("database connection successfull", db_driver)
 	}
 
-	return &database{DB}
+	return &Database{DB}
 }
 
-func (d *database) MigrateModels() {
+func (d *Database) MigrateModels() {
 	d.DB.AutoMigrate(&models.Admin{}, &models.Config{}, &models.InviteCode{}, &models.Planet{})
 }
 
-func (d *database) PopulateConfig() {
+func (d *Database) PopulateConfig() {
 	configRepo := repositories.NewConfigRepository(d.DB)
 	var config repositories.RepositoryResult[models.Config]
 	config = configRepo.FindFirst(&models.Config{})
