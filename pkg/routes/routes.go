@@ -11,6 +11,7 @@ import (
 
 func (r *Router) RegisterMiddlewares() {
 	r.Engine.Use(cors.Default())
+	r.Engine.Use(middlewares.ErrorMiddleware())
 	r.Engine.Use(middlewares.LoggerMiddleware())
 }
 

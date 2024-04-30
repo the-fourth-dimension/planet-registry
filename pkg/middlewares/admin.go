@@ -1,9 +1,12 @@
 package middlewares
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
@@ -17,9 +20,7 @@ func AdminMiddleware(a *repositories.AdminRepository) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input AdminInput
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
+			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
 		}
 
@@ -27,9 +28,11 @@ func AdminMiddleware(a *repositories.AdminRepository) gin.HandlerFunc {
 
 		findAdminResult := a.FindFirst(&findQuery)
 		if findAdminResult.Error != nil {
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"error": "Invalid username or password",
-			})
+			if errors.Is(findAdminResult.Error, gorm.ErrRecordNotFound) {
+				ctx.Error(HttpError.NewHttpError("invalid username or password", findAdminResult.Error.Error(), http.StatusForbidden))
+				return
+			}
+			ctx.AbortWithError(http.StatusInternalServerError, findAdminResult.Error)
 			return
 		}
 		ctx.Next()

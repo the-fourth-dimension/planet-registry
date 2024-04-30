@@ -3,29 +3,23 @@ package middlewares
 import (
 	"log"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
 func LoggerMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		
-		// Timer start
+
 		start := time.Now()
-
-		// Process Request
 		ctx.Next()
-
-		// Stop timer
 		end := time.Now()
-		latency := end.Sub(start)
 
-		// Request details
+		latency := end.Sub(start)
 		status := ctx.Writer.Status()
 		clientIP := ctx.ClientIP()
 		method := ctx.Request.Method
 
-		// Log details
-		log.Printf("[GIN] %v | %3d | %12v | %s | %-7s %s\n",
+		log.Printf("\n[GIN] %v | %3d | %12v | %s | %-7s %s\n",
 			end.Format("2006/01/02 - 15:04:05"),
 			status,
 			latency,
@@ -33,6 +27,6 @@ func LoggerMiddleware() gin.HandlerFunc {
 			method,
 			ctx.Request.URL.Path,
 		)
-		  
+
 	}
 }

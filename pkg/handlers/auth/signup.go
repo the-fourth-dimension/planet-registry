@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/types"
@@ -18,10 +19,10 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 	findConfigResult := h.ConfigRepository.FindFirst(&models.Config{})
 
 	if findConfigResult.Error != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, findConfigResult.Error)
 		if errors.Is(findConfigResult.Error, gorm.ErrRecordNotFound) {
 			log.Fatalln("server config not set!")
 		}
+		ctx.AbortWithError(http.StatusInternalServerError, findConfigResult.Error)
 		return
 	}
 
@@ -30,18 +31,14 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 	if findConfigResult.Result.InviteOnly {
 		var input types.CredentialsWithCode
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
+			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
 		}
 
 		inviteCode := h.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
 		if inviteCode.Error != nil {
 			if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"error": "Invalid Code",
-				})
+				ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
 				return
 			}
 			ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
@@ -53,9 +50,7 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 			return
 		}
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
+			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
 		}
 		planet.PlanetId = input.PlanetId
@@ -63,9 +58,7 @@ func (h *AuthHandler) postSignUp(ctx *gin.Context) {
 	} else {
 		var input types.Credentials
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
+			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
 		}
 		planet.PlanetId = input.PlanetId
