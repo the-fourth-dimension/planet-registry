@@ -31,7 +31,7 @@ func (ctx *Context) ExecuteTransaction(transaction func(*gorm.DB) bool) bool {
 			return errors.New("Transaction Failed")
 		},
 	)
-	if err == nil {
+	if err != nil {
 		return false
 	}
 	return true
