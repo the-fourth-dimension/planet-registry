@@ -5,6 +5,16 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
+type credentials struct {
+	PlanetId string `json:"planetId" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type credentialsWithCode struct {
+	credentials
+	Code string `json:"code" binding:"required"`
+}
+
 type authHandler struct {
 	router *gin.Engine
 	ctx    *repositories.Context

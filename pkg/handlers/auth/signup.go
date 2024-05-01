@@ -12,7 +12,6 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
-	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
 func (h *authHandler) postSignUp(ctx *gin.Context) {
@@ -28,7 +27,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 	planet := models.Planet{}
 
 	if findConfigResult.Result.InviteOnly {
-		var input types.CredentialsWithCode
+		var input credentialsWithCode
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
@@ -62,7 +61,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			return
 		}
 	} else {
-		var input types.Credentials
+		var input credentials
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return

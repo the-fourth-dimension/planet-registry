@@ -9,11 +9,10 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
-	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
 func (h *authHandler) postLogin(ctx *gin.Context) {
-	var input types.Credentials
+	var input credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.Error(HttpError.NewHttpError("Invalid input", err.Error(), http.StatusBadRequest))
