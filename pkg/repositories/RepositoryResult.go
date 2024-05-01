@@ -1,6 +1,6 @@
 package repositories
 
 type RepositoryResult[T any] struct {
-	Result *T
+	Result T
 	Error  error
 }

@@ -10,6 +10,14 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
+func (h *adminHandler) get(ctx *gin.Context) {
+	findResult := h.ctx.AdminRepository.Find(&models.Admin{})
+	if findResult.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
+	}
+	ctx.JSON(http.StatusOK, findResult)
+}
+
 func (h *adminHandler) post(ctx *gin.Context) {
 	var input credentials
 
