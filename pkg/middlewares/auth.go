@@ -20,11 +20,12 @@ func AuthMiddleware() func(*gin.Context) {
 			return
 		}
 		tokenString = tokenString[len("Bearer "):]
-		err := jwt.VerifyJwt(tokenString)
+		claims, err := jwt.VerifyJwt(tokenString)
 		if err != nil {
 			ctx.Error(HttpError.NewHttpError("Invalid jwt token", tokenString, http.StatusForbidden))
 			return
 		}
+		ctx.Set("tokenClaims", claims)
 		ctx.Next()
 	}
 }
