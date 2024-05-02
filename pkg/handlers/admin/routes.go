@@ -112,3 +112,26 @@ func (h *adminHandler) post(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 	return
 }
+
+func (h *adminHandler) deleteById(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(HttpError.NewHttpError("missing param fields", "id", http.StatusBadRequest))
+		return
+	}
+	uintId, error := strconv.ParseUint(id, 10, 64)
+	if error != nil {
+		ctx.Error(HttpError.NewHttpError("invalid field", "id", http.StatusBadRequest))
+	}
+	deleteResult := h.ctx.AdminRepository.DeleteOneById(uint(uintId))
+	if deleteResult.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, deleteResult.Error)
+		return
+	}
+	if deleteResult.Result <= 0 {
+		ctx.Error(HttpError.NewHttpError("record not found", id, http.StatusNotFound))
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+	return
+}

@@ -30,3 +30,8 @@ func (r *AdminRepository) Find(query *models.Admin) RepositoryResult[[]models.Ad
 	err := r.db.Find(&data, query).Error
 	return RepositoryResult[[]models.Admin]{Result: data, Error: err}
 }
+
+func (r *AdminRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
+	result := r.db.Delete(&models.Admin{}, ID)
+	return RepositoryResult[int64]{Result: result.RowsAffected, Error: result.Error}
+}
