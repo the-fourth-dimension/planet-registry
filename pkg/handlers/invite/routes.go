@@ -3,6 +3,7 @@ package InviteHandler
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -51,4 +52,31 @@ func (h *inviteHandler) get(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, findInvitesResult.Result)
+}
+
+func (h *inviteHandler) deleteById(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(HttpError.NewHttpError("Missing param fields", "id", http.StatusBadRequest))
+		return
+	}
+	uintId, error := strconv.ParseUint(id, 10, 64)
+	if error != nil {
+		ctx.Error(HttpError.NewHttpError("Invalid field", "id", http.StatusBadRequest))
+	}
+	findResult := h.ctx.InviteRepository.FindFirst(&models.Invite{Model: gorm.Model{ID: uint(uintId)}})
+	if findResult.Error != nil {
+		if errors.Is(findResult.Error, gorm.ErrRecordNotFound) {
+			ctx.Error(HttpError.NewHttpError("Invite.ID Not found", id, http.StatusNotFound))
+			return
+		}
+		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
+		return
+	}
+	deleteResult := h.ctx.InviteRepository.DeleteOneById(findResult.Result.ID)
+	if deleteResult.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, deleteResult.Error)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
 }
