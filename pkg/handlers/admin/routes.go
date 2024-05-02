@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
+	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
@@ -50,10 +51,17 @@ func (h *adminHandler) putById(ctx *gin.Context) {
 	}
 	changed := false
 	if input.Password != "" {
-		findResult.Result.Password = input.Password
-		changed = true
+		hashed, err := lib.HashPassword(input.Password)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		if hashed != findResult.Result.Password {
+			findResult.Result.Password = hashed
+			changed = true
+		}
 	}
-	if input.Username != "" {
+	if input.Username != "" && input.Password != findResult.Result.Password {
 		findResult.Result.Username = input.Username
 		changed = true
 	}
@@ -90,8 +98,12 @@ func (h *adminHandler) post(ctx *gin.Context) {
 			return
 		}
 	}
-
-	admin := models.Admin{Username: input.username, Password: input.password}
+	hashedPassword, err := lib.HashPassword(input.password)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	admin := models.Admin{Username: input.username, Password: hashedPassword}
 	saveAdminResult := h.ctx.AdminRepository.Save(&admin)
 	if saveAdminResult.Error != nil {
 		ctx.AbortWithError(500, saveAdminResult.Error)
