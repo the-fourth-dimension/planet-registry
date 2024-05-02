@@ -34,7 +34,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 		}
 
 		success := h.ctx.ExecuteTransaction(func(tx *gorm.DB) bool {
-			inviteCode := h.ctx.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
+			inviteCode := h.ctx.InviteRepository.FindFirst(&models.Invite{Code: input.Code})
 			if inviteCode.Error != nil {
 				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
 					ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
@@ -43,7 +43,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
 				return false
 			}
-			deleteInviteResult := h.ctx.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
+			deleteInviteResult := h.ctx.InviteRepository.DeleteOneById(inviteCode.Result.ID)
 			if deleteInviteResult.Error != nil {
 				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
 				return false

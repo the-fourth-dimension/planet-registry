@@ -7,20 +7,20 @@ import (
 )
 
 type Context struct {
-	PlanetRepository     *PlanetRepository
-	InviteCodeRepository *InviteCodeRepository
-	ConfigRepository     *ConfigRepository
-	AdminRepository      *AdminRepository
-	db                   *gorm.DB
+	PlanetRepository *PlanetRepository
+	InviteRepository *InviteRepository
+	ConfigRepository *ConfigRepository
+	AdminRepository  *AdminRepository
+	db               *gorm.DB
 }
 
 func NewContext(db *gorm.DB) *Context {
 	return &Context{
-		PlanetRepository:     NewPlanetRepository(db),
-		InviteCodeRepository: NewInviteCodeRepository(db),
-		ConfigRepository:     NewConfigRepository(db),
-		AdminRepository:      NewAdminRepository(db),
-		db:                   db,
+		PlanetRepository: NewPlanetRepository(db),
+		InviteRepository: NewInviteCodeRepository(db),
+		ConfigRepository: NewConfigRepository(db),
+		AdminRepository:  NewAdminRepository(db),
+		db:               db,
 	}
 }
 

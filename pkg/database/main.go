@@ -40,7 +40,7 @@ func ConnectDatabase() *Database {
 }
 
 func (d *Database) MigrateModels() {
-	d.DB.AutoMigrate(&models.Admin{}, &models.Config{}, &models.InviteCode{}, &models.Planet{})
+	d.DB.AutoMigrate(&models.Admin{}, &models.Config{}, &models.Invite{}, &models.Planet{})
 }
 
 func (d *Database) PopulateConfig() {
