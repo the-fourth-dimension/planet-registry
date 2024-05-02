@@ -19,7 +19,7 @@ func (h *adminHandler) get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, findResult)
 }
 
-type putRequest struct {
+type putRequestPayload struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 }
@@ -43,7 +43,7 @@ func (h *adminHandler) putById(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
 		return
 	}
-	var input putRequest
+	var input putRequestPayload
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 		return
