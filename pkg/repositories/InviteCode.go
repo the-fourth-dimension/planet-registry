@@ -25,7 +25,7 @@ func (r *InviteCodeRepository) FindFirst(query *models.InviteCode) RepositoryRes
 	return RepositoryResult[models.InviteCode]{Result: data, Error: err}
 }
 
-func (r *InviteCodeRepository) DeleteOneById(ID uint) RepositoryResult[any] {
-	err := r.db.Delete(&models.InviteCode{}, ID).Error
-	return RepositoryResult[any]{Error: err}
+func (r *InviteCodeRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
+	result := r.db.Delete(&models.InviteCode{}, ID)
+	return RepositoryResult[int64]{Error: result.Error, Result: result.RowsAffected}
 }

@@ -19,7 +19,10 @@ type adminHandler struct {
 func (h *adminHandler) RegisterRouter() {
 	admin := h.router.Group("/admin")
 	admin.Use(middlewares.SuperuserMiddleware())
+	admin.GET("/", h.get)
 	admin.POST("/", h.post)
+	admin.PUT("/:id", h.putById)
+	admin.DELETE("/:id", h.deleteById)
 }
 
 func New(router *gin.Engine, ctx *repositories.Context) *adminHandler {

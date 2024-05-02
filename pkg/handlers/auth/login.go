@@ -15,7 +15,7 @@ func (h *authHandler) postLogin(ctx *gin.Context) {
 	var input credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.Error(HttpError.NewHttpError("Invalid input", err.Error(), http.StatusBadRequest))
+		ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 		return
 	}
 
@@ -26,7 +26,7 @@ func (h *authHandler) postLogin(ctx *gin.Context) {
 	existingPlanetResult := h.ctx.PlanetRepository.FindFirst(&planet)
 	if existingPlanetResult.Error != nil {
 		if errors.Is(existingPlanetResult.Error, gorm.ErrRecordNotFound) {
-			ctx.Error(HttpError.NewHttpError("Not found", "planetId: "+planet.PlanetId, http.StatusNotFound))
+			ctx.Error(HttpError.NewHttpError("not found", "planetId: "+planet.PlanetId, http.StatusNotFound))
 			return
 		}
 		ctx.AbortWithError(http.StatusInternalServerError, existingPlanetResult.Error)
@@ -36,7 +36,7 @@ func (h *authHandler) postLogin(ctx *gin.Context) {
 	err := lib.VerifyPassword(input.Password, existingPlanetResult.Result.Password)
 
 	if err != nil {
-		ctx.Error(HttpError.NewHttpError("Invalid credentials", "password", http.StatusForbidden))
+		ctx.Error(HttpError.NewHttpError("invalid credentials", "password", http.StatusForbidden))
 		return
 	}
 

@@ -37,7 +37,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			inviteCode := h.ctx.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
 			if inviteCode.Error != nil {
 				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
-					ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
+					ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
 					return false
 				}
 				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
@@ -46,6 +46,10 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			deleteInviteResult := h.ctx.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
 			if deleteInviteResult.Error != nil {
 				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
+				return false
+			}
+			if deleteInviteResult.Result <= 0 {
+				ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
 				return false
 			}
 			if err := ctx.ShouldBindJSON(&input); err != nil {
