@@ -12,7 +12,6 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
-	"github.com/the_fourth_dimension/planet_registry/pkg/types"
 )
 
 func (h *authHandler) postSignUp(ctx *gin.Context) {
@@ -28,7 +27,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 	planet := models.Planet{}
 
 	if findConfigResult.Result.InviteOnly {
-		var input types.CredentialsWithCode
+		var input credentialsWithCode
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
@@ -38,7 +37,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			inviteCode := h.ctx.InviteCodeRepository.FindFirst(&models.InviteCode{Code: input.Code})
 			if inviteCode.Error != nil {
 				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
-					ctx.Error(HttpError.NewHttpError("Invalid Code", input.Code, http.StatusBadRequest))
+					ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
 					return false
 				}
 				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
@@ -47,6 +46,10 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			deleteInviteResult := h.ctx.InviteCodeRepository.DeleteOneById(inviteCode.Result.ID)
 			if deleteInviteResult.Error != nil {
 				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
+				return false
+			}
+			if deleteInviteResult.Result <= 0 {
+				ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
 				return false
 			}
 			if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -62,7 +65,7 @@ func (h *authHandler) postSignUp(ctx *gin.Context) {
 			return
 		}
 	} else {
-		var input types.Credentials
+		var input credentials
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return

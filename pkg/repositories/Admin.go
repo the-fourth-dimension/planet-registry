@@ -16,11 +16,22 @@ func NewAdminRepository(db *gorm.DB) *AdminRepository {
 func (r *AdminRepository) Save(data *models.Admin) RepositoryResult[models.Admin] {
 	err := r.db.Save(data).Error
 
-	return RepositoryResult[models.Admin]{Result: data, Error: err}
+	return RepositoryResult[models.Admin]{Result: *data, Error: err}
 }
 
 func (r *AdminRepository) FindFirst(query *models.Admin) RepositoryResult[models.Admin] {
 	var data models.Admin
+	err := r.db.First(&data, query).Error
+	return RepositoryResult[models.Admin]{Result: data, Error: err}
+}
+
+func (r *AdminRepository) Find(query *models.Admin) RepositoryResult[[]models.Admin] {
+	var data []models.Admin
 	err := r.db.Find(&data, query).Error
-	return RepositoryResult[models.Admin]{Result: &data, Error: err}
+	return RepositoryResult[[]models.Admin]{Result: data, Error: err}
+}
+
+func (r *AdminRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
+	result := r.db.Delete(&models.Admin{}, ID)
+	return RepositoryResult[int64]{Result: result.RowsAffected, Error: result.Error}
 }

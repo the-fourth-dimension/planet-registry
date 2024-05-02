@@ -51,8 +51,8 @@ func (d *Database) PopulateConfig() {
 	if config.Error != nil {
 		if errors.Is(config.Error, gorm.ErrRecordNotFound) {
 			log.Println("Config not found, creating one")
-			config.Result = &models.Config{InviteOnly: true}
-			if err := configRepo.Save(config.Result).Error; err != nil {
+			config.Result = models.Config{InviteOnly: true}
+			if err := configRepo.Save(&config.Result).Error; err != nil {
 				log.Fatalf("Error creating config: %v", err)
 			}
 		} else {

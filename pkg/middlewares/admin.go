@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
+	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
@@ -24,15 +25,20 @@ func AdminMiddleware(a *repositories.AdminRepository) gin.HandlerFunc {
 			return
 		}
 
-		findQuery := models.Admin{Username: input.Username, Password: input.Password}
+		findQuery := models.Admin{Username: input.Username}
 
 		findAdminResult := a.FindFirst(&findQuery)
 		if findAdminResult.Error != nil {
 			if errors.Is(findAdminResult.Error, gorm.ErrRecordNotFound) {
-				ctx.Error(HttpError.NewHttpError("invalid username or password", findAdminResult.Error.Error(), http.StatusForbidden))
+				ctx.Error(HttpError.NewHttpError("invalid username", findAdminResult.Error.Error(), http.StatusForbidden))
 				return
 			}
 			ctx.AbortWithError(http.StatusInternalServerError, findAdminResult.Error)
+			return
+		}
+		err := lib.VerifyPassword(input.Password, findAdminResult.Result.Password)
+		if err != nil {
+			ctx.Error(HttpError.NewHttpError("invalid password", input.Password, http.StatusForbidden))
 			return
 		}
 		ctx.Next()

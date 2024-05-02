@@ -16,16 +16,16 @@ func NewInviteCodeRepository(db *gorm.DB) *InviteCodeRepository {
 func (r *InviteCodeRepository) Save(data *models.InviteCode) RepositoryResult[models.InviteCode] {
 	err := r.db.Save(data).Error
 
-	return RepositoryResult[models.InviteCode]{Result: data, Error: err}
+	return RepositoryResult[models.InviteCode]{Result: *data, Error: err}
 }
 
 func (r *InviteCodeRepository) FindFirst(query *models.InviteCode) RepositoryResult[models.InviteCode] {
 	var data models.InviteCode
 	err := r.db.Find(&data, query).Error
-	return RepositoryResult[models.InviteCode]{Result: &data, Error: err}
+	return RepositoryResult[models.InviteCode]{Result: data, Error: err}
 }
 
-func (r *InviteCodeRepository) DeleteOneById(ID uint) RepositoryResult[any] {
-	err := r.db.Delete(&models.InviteCode{}, ID).Error
-	return RepositoryResult[any]{Error: err}
+func (r *InviteCodeRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
+	result := r.db.Delete(&models.InviteCode{}, ID)
+	return RepositoryResult[int64]{Error: result.Error, Result: result.RowsAffected}
 }

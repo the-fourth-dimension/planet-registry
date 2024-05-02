@@ -16,17 +16,17 @@ func NewPlanetRepository(db *gorm.DB) *PlanetRepository {
 func (r *PlanetRepository) Save(data *models.Planet) RepositoryResult[models.Planet] {
 	err := r.db.Save(data).Error
 
-	return RepositoryResult[models.Planet]{Result: data, Error: err}
+	return RepositoryResult[models.Planet]{Result: *data, Error: err}
 }
 
 func (r *PlanetRepository) FindAll(query *models.Planet) RepositoryResult[[]models.Planet] {
 	var data []models.Planet
 	err := r.db.Find(&data, query).Error
-	return RepositoryResult[[]models.Planet]{Result: &data, Error: err}
+	return RepositoryResult[[]models.Planet]{Result: data, Error: err}
 }
 
 func (r *PlanetRepository) FindFirst(query *models.Planet) RepositoryResult[models.Planet] {
 	var data models.Planet
 	err := r.db.Find(&data, query).Error
-	return RepositoryResult[models.Planet]{Result: &data, Error: err}
+	return RepositoryResult[models.Planet]{Result: data, Error: err}
 }
