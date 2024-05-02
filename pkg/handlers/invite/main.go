@@ -12,6 +12,7 @@ type inviteHandler struct {
 
 func (h *inviteHandler) RegisterRouter() {
 	invite := h.router.Group("/invite")
+	invite.POST("/", h.post)
 }
 
 func New(router *gin.Engine, ctx *repositories.Context) *inviteHandler {
