@@ -19,6 +19,12 @@ func (r *InviteRepository) Save(data *models.Invite) RepositoryResult[models.Inv
 	return RepositoryResult[models.Invite]{Result: *data, Error: err}
 }
 
+func (r *InviteRepository) Find(query *models.Invite) RepositoryResult[[]models.Invite] {
+	var data []models.Invite
+	err := r.db.Find(&data, query).Error
+	return RepositoryResult[[]models.Invite]{Result: data, Error: err}
+}
+
 func (r *InviteRepository) FindFirst(query *models.Invite) RepositoryResult[models.Invite] {
 	var data models.Invite
 	err := r.db.Find(&data, query).Error

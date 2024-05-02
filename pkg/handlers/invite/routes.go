@@ -38,3 +38,17 @@ func (h *inviteHandler) post(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"id": saveInviteResult.Result.ID})
 }
+
+func (h *inviteHandler) get(ctx *gin.Context) {
+	code := ctx.Query("code")
+	findObj := models.Invite{}
+	if code != "" {
+		findObj.Code = code
+	}
+	findInvitesResult := h.ctx.InviteRepository.Find(&findObj)
+	if findInvitesResult.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, findInvitesResult.Error)
+		return
+	}
+	ctx.JSON(http.StatusOK, findInvitesResult.Result)
+}
