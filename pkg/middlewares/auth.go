@@ -13,16 +13,19 @@ func AuthMiddleware() func(*gin.Context) {
 		tokenString := ctx.Request.Header.Get("Authorization")
 		if tokenString == "" {
 			ctx.Error(HttpError.NewHttpError("missing header", "Authorization", http.StatusBadRequest))
+			ctx.Abort()
 			return
 		}
 		if len(tokenString) < 8 {
 			ctx.Error(HttpError.NewHttpError("Invalid authorization header", tokenString, http.StatusForbidden))
+			ctx.Abort()
 			return
 		}
 		tokenString = tokenString[len("Bearer "):]
 		claims, err := jwt.VerifyJwt(tokenString)
 		if err != nil {
 			ctx.Error(HttpError.NewHttpError("Invalid jwt token", tokenString, http.StatusForbidden))
+			ctx.Abort()
 			return
 		}
 		ctx.Set("tokenClaims", claims)

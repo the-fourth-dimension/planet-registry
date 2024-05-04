@@ -17,7 +17,7 @@ func (h *adminHandler) get(ctx *gin.Context) {
 	if findResult.Error != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
 	}
-	ctx.JSON(http.StatusOK, findResult)
+	ctx.JSON(http.StatusOK, findResult.Result)
 }
 
 type putRequestPayload struct {
