@@ -98,7 +98,7 @@ func (h *inviteHandler) putById(ctx *gin.Context) {
 	findResult := h.ctx.InviteRepository.FindFirst(&models.Invite{Model: gorm.Model{ID: uint(uintId)}})
 	if findResult.Error != nil {
 		if errors.Is(findResult.Error, gorm.ErrRecordNotFound) {
-			ctx.Error(HttpError.NewHttpError("Admin.ID Not found", id, http.StatusNotFound))
+			ctx.Error(HttpError.NewHttpError("Invite.ID Not found", id, http.StatusNotFound))
 			return
 		}
 		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
