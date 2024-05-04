@@ -1,4 +1,4 @@
-package AuthHandler
+package PlanetHandler
 
 import (
 	"github.com/gin-gonic/gin"
@@ -15,19 +15,19 @@ type credentialsWithCode struct {
 	Code string `json:"code" binding:"required"`
 }
 
-type authHandler struct {
+type planetHandler struct {
 	router *gin.Engine
 	ctx    *repositories.Context
 }
 
-func (h *authHandler) RegisterRouter() {
+func (h *planetHandler) RegisterRouter() {
 	auth := h.router.Group("/auth")
-	auth.POST("/signup", h.postSignUp)
+	auth.POST("/", h.post)
 	auth.POST("/login", h.postLogin)
 }
 
-func New(router *gin.Engine, ctx *repositories.Context) *authHandler {
-	return &authHandler{
+func New(router *gin.Engine, ctx *repositories.Context) *planetHandler {
+	return &planetHandler{
 		router: router,
 		ctx:    ctx,
 	}
