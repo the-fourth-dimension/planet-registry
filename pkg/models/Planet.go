@@ -14,14 +14,14 @@ type Planet struct {
 	Password string `gorm:"size:255;not null" json:"password"`
 }
 
-func (planet *Planet) BeforeSave() (err error) {
+func (planet *Planet) BeforeSave(scope *gorm.Scope) (err error) {
 	hashedPassword, hashErr := lib.HashPassword(planet.Password)
 
 	if hashErr != nil {
 		err = hashErr
 		return err
 	}
-	planet.Password = hashedPassword
+	scope.SetColumn("password", hashedPassword)
 	planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
 	return
 }
