@@ -32,6 +32,6 @@ func (r *InviteRepository) FindFirst(query *models.Invite) RepositoryResult[mode
 }
 
 func (r *InviteRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
-	result := r.db.Delete(&models.Invite{}, ID)
+	result := r.db.Unscoped().Delete(&models.Invite{}, ID)
 	return RepositoryResult[int64]{Error: result.Error, Result: result.RowsAffected}
 }
