@@ -1,4 +1,4 @@
-package InviteHandler
+package InvitesHandler
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
-func (h *inviteHandler) post(ctx *gin.Context) {
+func (h *invitesHandler) post(ctx *gin.Context) {
 	var input struct {
 		Code string `json:"code"`
 	}
@@ -44,7 +44,7 @@ func (h *inviteHandler) post(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"id": saveInviteResult.Result.ID})
 }
 
-func (h *inviteHandler) get(ctx *gin.Context) {
+func (h *invitesHandler) get(ctx *gin.Context) {
 	code := ctx.Query("code")
 	findObj := models.Invite{}
 	if code != "" {
@@ -58,7 +58,7 @@ func (h *inviteHandler) get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, findInvitesResult.Result)
 }
 
-func (h *inviteHandler) deleteById(ctx *gin.Context) {
+func (h *invitesHandler) deleteById(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.Error(HttpError.NewHttpError("Missing param fields", "id", http.StatusBadRequest))
@@ -89,7 +89,7 @@ type putRequestPayload struct {
 	Code string `json:"code" binding:"required"`
 }
 
-func (h *inviteHandler) putById(ctx *gin.Context) {
+func (h *invitesHandler) putById(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.Error(HttpError.NewHttpError("missing param fields", "id", http.StatusBadRequest))

@@ -1,4 +1,4 @@
-package PlanetHandler
+package PlanetsHandler
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
-func (h *planetHandler) post(ctx *gin.Context) {
+func (h *planetsHandler) post(ctx *gin.Context) {
 	findConfigResult := h.ctx.ConfigRepository.FindFirst(&models.Config{})
 	if findConfigResult.Error != nil {
 		if errors.Is(findConfigResult.Error, gorm.ErrRecordNotFound) {

@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	AdminHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/admin"
-	InviteHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/invite"
-	PlanetHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/planet"
+	AdminsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/admins"
+	InvitesHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/invites"
+	PlanetsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/planet"
 	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
@@ -29,10 +29,10 @@ func (r *Router) RegisterRoutes() {
 		ctx.Status(http.StatusOK)
 	})
 	ctx := repositories.NewContext(r.DB)
-	planetHandler := PlanetHandler.New(r.Engine, ctx)
+	planetHandler := PlanetsHandler.New(r.Engine, ctx)
 	planetHandler.RegisterRouter()
-	adminHandler := AdminHandler.New(r.Engine, ctx)
+	adminHandler := AdminsHandler.New(r.Engine, ctx)
 	adminHandler.RegisterRouter()
-	inviteHandler := InviteHandler.New(r.Engine, ctx)
+	inviteHandler := InvitesHandler.New(r.Engine, ctx)
 	inviteHandler.RegisterRouter()
 }

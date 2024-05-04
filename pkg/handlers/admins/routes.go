@@ -1,4 +1,4 @@
-package AdminHandler
+package AdminsHandler
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
-func (h *adminHandler) get(ctx *gin.Context) {
+func (h *adminsHandler) get(ctx *gin.Context) {
 	findResult := h.ctx.AdminRepository.Find(&models.Admin{})
 	if findResult.Error != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
@@ -24,7 +24,7 @@ type putRequestPayload struct {
 	Password string `json:"password,omitempty"`
 }
 
-func (h *adminHandler) putById(ctx *gin.Context) {
+func (h *adminsHandler) putById(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.Error(HttpError.NewHttpError("Missing param fields", "id", http.StatusBadRequest))
@@ -70,7 +70,7 @@ func (h *adminHandler) putById(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-func (h *adminHandler) post(ctx *gin.Context) {
+func (h *adminsHandler) post(ctx *gin.Context) {
 	var input credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -100,7 +100,7 @@ func (h *adminHandler) post(ctx *gin.Context) {
 	return
 }
 
-func (h *adminHandler) deleteById(ctx *gin.Context) {
+func (h *adminsHandler) deleteById(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.Error(HttpError.NewHttpError("missing param fields", "id", http.StatusBadRequest))

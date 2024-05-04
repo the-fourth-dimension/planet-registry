@@ -1,4 +1,4 @@
-package PlanetHandler
+package PlanetsHandler
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
-func (h *planetHandler) postLogin(ctx *gin.Context) {
+func (h *planetsHandler) postLogin(ctx *gin.Context) {
 	var input credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {

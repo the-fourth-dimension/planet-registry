@@ -1,4 +1,4 @@
-package AdminHandler
+package AdminsHandler
 
 import (
 	"github.com/gin-gonic/gin"
@@ -11,13 +11,13 @@ type credentials struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type adminHandler struct {
+type adminsHandler struct {
 	router *gin.Engine
 	ctx    *repositories.Context
 }
 
-func (h *adminHandler) RegisterRouter() {
-	admin := h.router.Group("/admin")
+func (h *adminsHandler) RegisterRouter() {
+	admin := h.router.Group("/admins")
 	admin.Use(middlewares.SuperuserMiddleware())
 	admin.GET("/", h.get)
 	admin.POST("/", h.post)
@@ -25,8 +25,8 @@ func (h *adminHandler) RegisterRouter() {
 	admin.DELETE("/:id", h.deleteById)
 }
 
-func New(router *gin.Engine, ctx *repositories.Context) *adminHandler {
-	return &adminHandler{
+func New(router *gin.Engine, ctx *repositories.Context) *adminsHandler {
+	return &adminsHandler{
 		router: router,
 		ctx:    ctx,
 	}
