@@ -16,7 +16,7 @@ func (h *inviteHandler) post(ctx *gin.Context) {
 		Code string `json:"code"`
 	}
 
-	if err := ctx.ShouldBindJSON(input); err != nil {
+	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 		return
 	}
