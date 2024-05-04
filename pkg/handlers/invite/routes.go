@@ -34,6 +34,10 @@ func (h *inviteHandler) post(ctx *gin.Context) {
 	findInviteResult.Result.Code = input.Code
 	saveInviteResult := h.ctx.InviteRepository.Save(&findInviteResult.Result)
 	if saveInviteResult.Error != nil {
+		if saveInviteResult.Error.Error() == "code-length-too-short" {
+			ctx.Error(HttpError.NewHttpError("code-length-too-short", input.Code, http.StatusBadRequest))
+			return
+		}
 		ctx.AbortWithError(http.StatusInternalServerError, saveInviteResult.Error)
 		return
 	}
@@ -82,7 +86,7 @@ func (h *inviteHandler) deleteById(ctx *gin.Context) {
 }
 
 type putRequestPayload struct {
-	Code string `json:"code"`
+	Code string `json:"code" binding:"required"`
 }
 
 func (h *inviteHandler) putById(ctx *gin.Context) {
@@ -117,6 +121,10 @@ func (h *inviteHandler) putById(ctx *gin.Context) {
 	if changed {
 		saveResult := h.ctx.InviteRepository.Save(&findResult.Result)
 		if saveResult.Error != nil {
+			if saveResult.Error.Error() == "code-length-too-short" {
+				ctx.Error(HttpError.NewHttpError("code-length-too-short", input.Code, http.StatusBadRequest))
+				return
+			}
 			ctx.AbortWithError(http.StatusInternalServerError, saveResult.Error)
 			return
 		}
