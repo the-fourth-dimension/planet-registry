@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	AdminHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/admin"
 	AuthHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/auth"
+	InviteHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/invite"
 	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
@@ -29,4 +31,8 @@ func (r *Router) RegisterRoutes() {
 	ctx := repositories.NewContext(r.DB)
 	authHandler := AuthHandler.New(r.Engine, ctx)
 	authHandler.RegisterRouter()
+	adminHandler := AdminHandler.New(r.Engine, ctx)
+	adminHandler.RegisterRouter()
+	inviteHandler := InviteHandler.New(r.Engine, ctx)
+	inviteHandler.RegisterRouter()
 }
