@@ -12,7 +12,7 @@ func SuperuserMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		claims, exists := ctx.Get("tokenClaims")
 		if !exists {
-			ctx.Error(HttpError.NewHttpError("invalid claims", "", http.StatusForbidden))
+			ctx.Error(HttpError.NewHttpError("missing claims", "", http.StatusForbidden))
 			ctx.Abort()
 			return
 		}

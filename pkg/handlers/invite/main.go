@@ -2,6 +2,7 @@ package InviteHandler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
@@ -12,6 +13,7 @@ type inviteHandler struct {
 
 func (h *inviteHandler) RegisterRouter() {
 	invite := h.router.Group("/invite")
+	invite.Use(middlewares.AdminMiddleware(h.ctx.AdminRepository))
 	invite.GET("/", h.get)
 	invite.POST("/", h.post)
 	invite.DELETE("/:id", h.deleteById)
