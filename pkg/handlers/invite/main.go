@@ -15,6 +15,7 @@ func (h *inviteHandler) RegisterRouter() {
 	invite.GET("/", h.get)
 	invite.POST("/", h.post)
 	invite.DELETE("/:id", h.deleteById)
+	invite.PUT("/:id", h.putById)
 }
 
 func New(router *gin.Engine, ctx *repositories.Context) *inviteHandler {
