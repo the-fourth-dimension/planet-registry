@@ -32,6 +32,6 @@ func (r *AdminRepository) Find(query *models.Admin) RepositoryResult[[]models.Ad
 }
 
 func (r *AdminRepository) DeleteOneById(ID uint) RepositoryResult[int64] {
-	result := r.db.Delete(&models.Admin{}, ID)
+	result := r.db.Unscoped().Delete(&models.Admin{}, ID)
 	return RepositoryResult[int64]{Result: result.RowsAffected, Error: result.Error}
 }

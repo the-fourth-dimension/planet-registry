@@ -1,4 +1,4 @@
-package AuthHandler
+package PlanetHandler
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
-func (h *authHandler) postLogin(ctx *gin.Context) {
+func (h *planetHandler) postLogin(ctx *gin.Context) {
 	var input credentials
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -40,7 +40,5 @@ func (h *authHandler) postLogin(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"planet": planet,
-	})
+	ctx.Status(200)
 }

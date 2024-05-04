@@ -24,10 +24,10 @@ func NewContext(db *gorm.DB) *Context {
 	}
 }
 
-func (ctx *Context) ExecuteTransaction(transaction func(*gorm.DB) bool) bool {
+func (ctx *Context) ExecuteTransaction(transaction func(*gorm.DB, *Context) bool) bool {
 	err := ctx.db.Transaction(
 		func(tx *gorm.DB) error {
-			if transaction(ctx.db) {
+			if transaction(tx, NewContext(tx)) {
 				return nil
 			}
 			return errors.New("Transaction Failed")

@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
-	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 )
 
@@ -17,7 +16,7 @@ func (h *adminHandler) get(ctx *gin.Context) {
 	if findResult.Error != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
 	}
-	ctx.JSON(http.StatusOK, findResult)
+	ctx.JSON(http.StatusOK, findResult.Result)
 }
 
 type putRequestPayload struct {
@@ -51,31 +50,23 @@ func (h *adminHandler) putById(ctx *gin.Context) {
 	}
 	changed := false
 	if input.Password != "" {
-		hashed, err := lib.HashPassword(input.Password)
-		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-		if hashed != findResult.Result.Password {
-			findResult.Result.Password = hashed
-			changed = true
-		}
+		findResult.Result.Password = input.Password
+		changed = true
 	}
-	if input.Username != "" && input.Password != findResult.Result.Password {
+	if input.Username != "" {
 		findResult.Result.Username = input.Username
 		changed = true
 	}
-	if changed {
-		saveResult := h.ctx.AdminRepository.Save(&findResult.Result)
-		if saveResult.Error != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, saveResult.Error)
-			return
-		}
-	}
 	if !changed {
-		ctx.JSON(http.StatusNoContent, gin.H{"message": "Nothing to change"})
+		ctx.Status(http.StatusNoContent)
 		return
 	}
+	saveResult := h.ctx.AdminRepository.Save(&findResult.Result)
+	if saveResult.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, saveResult.Error)
+		return
+	}
+
 	ctx.Status(http.StatusAccepted)
 }
 
@@ -87,9 +78,9 @@ func (h *adminHandler) post(ctx *gin.Context) {
 		return
 	}
 
-	adminFindByUsernameResult := h.ctx.AdminRepository.FindFirst(&models.Admin{Username: input.username})
+	adminFindByUsernameResult := h.ctx.AdminRepository.FindFirst(&models.Admin{Username: input.Username})
 	if adminFindByUsernameResult.Error == nil {
-		ctx.Error(HttpError.NewHttpError("Username already exists", input.username, http.StatusConflict))
+		ctx.Error(HttpError.NewHttpError("Username already exists", input.Username, http.StatusConflict))
 		return
 	}
 	if adminFindByUsernameResult.Error != nil {
@@ -98,12 +89,8 @@ func (h *adminHandler) post(ctx *gin.Context) {
 			return
 		}
 	}
-	hashedPassword, err := lib.HashPassword(input.password)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	admin := models.Admin{Username: input.username, Password: hashedPassword}
+
+	admin := models.Admin{Username: input.Username, Password: input.Password}
 	saveAdminResult := h.ctx.AdminRepository.Save(&admin)
 	if saveAdminResult.Error != nil {
 		ctx.AbortWithError(500, saveAdminResult.Error)
