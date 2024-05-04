@@ -87,9 +87,9 @@ func (h *adminHandler) post(ctx *gin.Context) {
 		return
 	}
 
-	adminFindByUsernameResult := h.ctx.AdminRepository.FindFirst(&models.Admin{Username: input.username})
+	adminFindByUsernameResult := h.ctx.AdminRepository.FindFirst(&models.Admin{Username: input.Username})
 	if adminFindByUsernameResult.Error == nil {
-		ctx.Error(HttpError.NewHttpError("Username already exists", input.username, http.StatusConflict))
+		ctx.Error(HttpError.NewHttpError("Username already exists", input.Username, http.StatusConflict))
 		return
 	}
 	if adminFindByUsernameResult.Error != nil {
@@ -98,12 +98,12 @@ func (h *adminHandler) post(ctx *gin.Context) {
 			return
 		}
 	}
-	hashedPassword, err := lib.HashPassword(input.password)
+	hashedPassword, err := lib.HashPassword(input.Password)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	admin := models.Admin{Username: input.username, Password: hashedPassword}
+	admin := models.Admin{Username: input.Username, Password: hashedPassword}
 	saveAdminResult := h.ctx.AdminRepository.Save(&admin)
 	if saveAdminResult.Error != nil {
 		ctx.AbortWithError(500, saveAdminResult.Error)
