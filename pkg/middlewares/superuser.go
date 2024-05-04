@@ -19,7 +19,6 @@ func SuperuserMiddleware() gin.HandlerFunc {
 		typedClaims := claims.(jwt.MapClaims)
 		role, ok := typedClaims["role"].(string)
 		if !ok {
-			println("caught in superuser")
 			ctx.Error(HttpError.NewHttpError("missing claim", "role", http.StatusForbidden))
 			ctx.Abort()
 			return
@@ -29,7 +28,6 @@ func SuperuserMiddleware() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		println("going next")
 		ctx.Next()
 	}
 }
