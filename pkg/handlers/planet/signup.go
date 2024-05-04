@@ -2,15 +2,12 @@ package PlanetHandler
 
 import (
 	"errors"
-	"html"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
-	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
 	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
@@ -80,13 +77,6 @@ func (h *planetHandler) post(ctx *gin.Context) {
 				return false
 			}
 		}
-		hashedPassword, err := lib.HashPassword(planet.Password)
-		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return false
-		}
-		planet.Password = hashedPassword
-		planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
 		savePlanetResult := txCtx.PlanetRepository.Save(&planet)
 
 		if savePlanetResult.Error != nil {
