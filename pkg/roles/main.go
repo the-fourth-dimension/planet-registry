@@ -1,12 +1,7 @@
 package roles
 
-var roles = map[string]bool{
-	"hyperspace": true,
-	"admin":      true,
-	"superuser":  true,
-}
+var roles = []string{"superuser", "admin", "hyperspace"}
 
-func IsValidRole(role string) bool {
-	_, ok := roles[role]
-	return ok
+func IsValidRole(roleValue int) bool {
+	return roleValue >= 0 && roleValue < len(roles)
 }
