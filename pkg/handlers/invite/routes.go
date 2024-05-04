@@ -80,3 +80,50 @@ func (h *inviteHandler) deleteById(ctx *gin.Context) {
 	}
 	ctx.Status(http.StatusNoContent)
 }
+
+type putRequestPayload struct {
+	Code string `json:"code"`
+}
+
+func (h *inviteHandler) putById(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(HttpError.NewHttpError("missing param fields", "id", http.StatusBadRequest))
+		return
+	}
+	uintId, error := strconv.ParseUint(id, 10, 64)
+	if error != nil {
+		ctx.Error(HttpError.NewHttpError("invalid field", "id", http.StatusBadRequest))
+	}
+	findResult := h.ctx.InviteRepository.FindFirst(&models.Invite{Model: gorm.Model{ID: uint(uintId)}})
+	if findResult.Error != nil {
+		if errors.Is(findResult.Error, gorm.ErrRecordNotFound) {
+			ctx.Error(HttpError.NewHttpError("Admin.ID Not found", id, http.StatusNotFound))
+			return
+		}
+		ctx.AbortWithError(http.StatusInternalServerError, findResult.Error)
+		return
+	}
+	var input putRequestPayload
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
+		return
+	}
+	changed := false
+	if input.Code != findResult.Result.Code {
+		findResult.Result.Code = input.Code
+		changed = true
+	}
+	if changed {
+		saveResult := h.ctx.InviteRepository.Save(&findResult.Result)
+		if saveResult.Error != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, saveResult.Error)
+			return
+		}
+	}
+	if !changed {
+		ctx.JSON(http.StatusNoContent, gin.H{"message": "Nothing to change"})
+		return
+	}
+	ctx.Status(http.StatusAccepted)
+}
