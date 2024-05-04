@@ -16,7 +16,7 @@ func (r *Router) RegisterMiddlewares() {
 	r.Engine.Use(cors.Default())
 	r.Engine.Use(middlewares.ErrorMiddleware())
 	r.Engine.Use(middlewares.LoggerMiddleware())
-
+	r.Engine.Use(middlewares.AuthMiddleware())
 }
 
 func (r *Router) RegisterRoutes() {
@@ -29,7 +29,6 @@ func (r *Router) RegisterRoutes() {
 		ctx.Status(http.StatusOK)
 	})
 	ctx := repositories.NewContext(r.DB)
-	r.Engine.Use(middlewares.AuthMiddleware(ctx.AdminRepository))
 	planetHandler := PlanetHandler.New(r.Engine, ctx)
 	planetHandler.RegisterRouter()
 	adminHandler := AdminHandler.New(r.Engine, ctx)

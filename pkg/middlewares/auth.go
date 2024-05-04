@@ -7,11 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib/jwt"
-	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 	"github.com/the_fourth_dimension/planet_registry/pkg/roles"
 )
 
-func AuthMiddleware(a *repositories.AdminRepository) func(*gin.Context) {
+func AuthMiddleware() func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		tokenString := ctx.Request.Header.Get("Authorization")
 		if tokenString == "" {

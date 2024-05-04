@@ -12,6 +12,7 @@ import (
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
 	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
 func (h *planetHandler) post(ctx *gin.Context) {
@@ -25,45 +26,27 @@ func (h *planetHandler) post(ctx *gin.Context) {
 	}
 
 	planet := models.Planet{}
-
+	var code = ""
+	var inviteCodeID uint
 	if findConfigResult.Result.InviteOnly {
 		var input credentialsWithCode
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
 			return
 		}
-
-		success := h.ctx.ExecuteTransaction(func(tx *gorm.DB) bool {
-			inviteCode := h.ctx.InviteRepository.FindFirst(&models.Invite{Code: input.Code})
-			if inviteCode.Error != nil {
-				if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
-					ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
-					return false
-				}
-				ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
-				return false
+		code = input.Code
+		inviteCode := h.ctx.InviteRepository.FindFirst(&models.Invite{Code: code})
+		if inviteCode.Error != nil {
+			if errors.Is(inviteCode.Error, gorm.ErrRecordNotFound) {
+				ctx.Error(HttpError.NewHttpError("invalid code", code, http.StatusBadRequest))
+				return
 			}
-			deleteInviteResult := h.ctx.InviteRepository.DeleteOneById(inviteCode.Result.ID)
-			if deleteInviteResult.Error != nil {
-				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
-				return false
-			}
-			if deleteInviteResult.Result <= 0 {
-				ctx.Error(HttpError.NewHttpError("invalid code", input.Code, http.StatusBadRequest))
-				return false
-			}
-			if err := ctx.ShouldBindJSON(&input); err != nil {
-				ctx.Error(HttpError.NewHttpError("invalid input", err.Error(), http.StatusBadRequest))
-				return false
-			}
-			planet.PlanetId = input.PlanetId
-			planet.Password = input.Password
-			return true
-		})
-
-		if !success {
+			ctx.AbortWithError(http.StatusInternalServerError, inviteCode.Error)
 			return
 		}
+		inviteCodeID = inviteCode.Result.ID
+		planet.PlanetId = input.PlanetId
+		planet.Password = input.Password
 	} else {
 		var input credentials
 		if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -73,19 +56,48 @@ func (h *planetHandler) post(ctx *gin.Context) {
 		planet.PlanetId = input.PlanetId
 		planet.Password = input.Password
 	}
-	hashedPassword, err := lib.HashPassword(planet.Password)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+	findPlanetResult := h.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: planet.PlanetId})
+	if findPlanetResult.Error != nil {
+		if !errors.Is(findPlanetResult.Error, gorm.ErrRecordNotFound) {
+			ctx.AbortWithError(http.StatusInternalServerError, findPlanetResult.Error)
+			return
+		}
+	} else {
+		ctx.Error(HttpError.NewHttpError("planet already exists", planet.PlanetId, http.StatusConflict))
 		return
 	}
-	planet.Password = hashedPassword
-	planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
-	savePlanetResult := h.ctx.PlanetRepository.Save(&planet)
 
-	if savePlanetResult.Error != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, savePlanetResult.Error)
+	success := false
+	success = h.ctx.ExecuteTransaction(func(d *gorm.DB, txCtx *repositories.Context) bool {
+		if findConfigResult.Result.InviteOnly {
+			deleteInviteResult := txCtx.InviteRepository.DeleteOneById(inviteCodeID)
+			if deleteInviteResult.Error != nil {
+				ctx.AbortWithError(http.StatusInternalServerError, deleteInviteResult.Error)
+				return false
+			}
+			if deleteInviteResult.Result <= 0 {
+				ctx.Error(HttpError.NewHttpError("invalid code", code, http.StatusBadRequest))
+				return false
+			}
+		}
+		hashedPassword, err := lib.HashPassword(planet.Password)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return false
+		}
+		planet.Password = hashedPassword
+		planet.PlanetId = html.EscapeString(strings.TrimSpace(planet.PlanetId))
+		savePlanetResult := txCtx.PlanetRepository.Save(&planet)
+
+		if savePlanetResult.Error != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, savePlanetResult.Error)
+			return false
+		}
+		return true
+	})
+	if !success {
+		return
 	}
-
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "registration success",
 	})
