@@ -40,7 +40,5 @@ func (h *planetHandler) postLogin(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"planet": planet,
-	})
+	ctx.Status(200)
 }

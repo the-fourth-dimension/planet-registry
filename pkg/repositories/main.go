@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/gorm"
 )
@@ -34,7 +33,6 @@ func (ctx *Context) ExecuteTransaction(transaction func(*gorm.DB, *Context) bool
 			return errors.New("Transaction Failed")
 		},
 	)
-	fmt.Println(err)
 	if err != nil {
 		return false
 	}
