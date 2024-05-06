@@ -28,6 +28,7 @@ func TestMiddlewares(t *testing.T) {
 	router := routes.NewRouter(ctx)
 	router.Engine.GET("/auth", middlewares.ErrorMiddleware(), middlewares.AuthMiddleware(), testHandler)
 	router.Engine.GET("/admin", middlewares.ErrorMiddleware(), middlewares.AuthMiddleware(), middlewares.AdminMiddleware(ctx.AdminRepository), testHandler)
+	router.Engine.GET("/superuser", middlewares.ErrorMiddleware(), middlewares.AuthMiddleware(), middlewares.SuperuserMiddleware(), testHandler)
 	suite.Run(t, &MiddlewareTestSuite{db: db, router: router})
 	db.DB.Close()
 }
