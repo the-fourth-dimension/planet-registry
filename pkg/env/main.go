@@ -50,7 +50,7 @@ func LoadEnv() {
 	}
 	envFile, isValidEnv := envs[GetEnv(APP_ENV)]
 	if !isValidEnv {
-		log.Println("invalid APP_ENV")
+		log.Printf("invalid APP_ENV: %s\n", GetEnv(APP_ENV))
 	} else {
 		path := envFile
 		if GetEnv(APP_ENV) == "TEST" {
@@ -65,6 +65,7 @@ func LoadEnv() {
 			log.Printf("%s file not found\n", envFile)
 		}
 	}
+	log.Printf("Environment: %s\n", GetEnv(APP_ENV))
 	for idx := range keys {
 		key := keys[idx]
 		_, isPresent := os.LookupEnv(key)
