@@ -15,6 +15,7 @@ func (h *configsHandler) RegisterRouter() {
 	admin := h.router.Group("/configs")
 	admin.Use(middlewares.SuperuserMiddleware())
 	admin.GET("/", h.get)
+	admin.PUT("/", h.put)
 }
 
 func New(router *gin.Engine, ctx *repositories.Context) *configsHandler {
