@@ -6,7 +6,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	AdminsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/admins"
-	ConfigsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/config"
+	ConfigsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/configs"
 	InvitesHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/invites"
 	PlanetsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/planet"
 	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
