@@ -98,3 +98,16 @@ func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithValidPassword() {
 
 	assert.Equal(suite.T(), 200, w.Code)
 }
+
+func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithInvalidPassword() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
+	suite.ctx.PlanetRepository.Save(&models.Planet{PlanetId: "earth", Password: "password"})
+	body := serializeBody(gin.H{"planetId": "earth", "password": "notpassword"})
+	req, _ := http.NewRequest("POST", "/planets/login", body)
+	req.Header.Set("Authorization", makeAuthHeader(token))
+
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 403, w.Code)
+}
