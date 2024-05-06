@@ -10,7 +10,6 @@ import (
 	InvitesHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/invites"
 	PlanetsHandler "github.com/the_fourth_dimension/planet_registry/pkg/handlers/planet"
 	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
-	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
 func (r *Router) RegisterMiddlewares() {
@@ -29,13 +28,13 @@ func (r *Router) RegisterRoutes() {
 	r.Engine.GET("/", func(ctx *gin.Context) {
 		ctx.Status(http.StatusOK)
 	})
-	ctx := repositories.NewContext(r.DB)
-	planetHandler := PlanetsHandler.New(r.Engine, ctx)
+
+	planetHandler := PlanetsHandler.New(r.Engine, r.ctx)
 	planetHandler.RegisterRouter()
-	adminHandler := AdminsHandler.New(r.Engine, ctx)
+	adminHandler := AdminsHandler.New(r.Engine, r.ctx)
 	adminHandler.RegisterRouter()
-	inviteHandler := InvitesHandler.New(r.Engine, ctx)
+	inviteHandler := InvitesHandler.New(r.Engine, r.ctx)
 	inviteHandler.RegisterRouter()
-	configHandler := ConfigsHandler.New(r.Engine, ctx)
+	configHandler := ConfigsHandler.New(r.Engine, r.ctx)
 	configHandler.RegisterRouter()
 }

@@ -13,10 +13,11 @@ import (
 )
 
 type Database struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	logger *log.Logger
 }
 
-func ConnectDatabase() *Database {
+func ConnectDatabase(logger *log.Logger) *Database {
 	db_driver := env.GetEnv(env.DB_DRIVER)
 	db_host := env.GetEnv(env.DB_HOST)
 	db_user := env.GetEnv(env.DB_USER)
@@ -29,15 +30,15 @@ func ConnectDatabase() *Database {
 	DB, err := gorm.Open(db_driver, db_url)
 
 	if err != nil {
-		log.Fatal("database connection error:", err)
+		logger.Panic("database connection error:", err)
 	} else {
-		log.Println("database connection successfull:", db_driver)
+		logger.Println("database connection successfull:", db_driver)
 	}
 
-	if env.GetEnv(env.APP_ENV) != "PRODUCTION" {
+	if env.GetEnv(env.APP_ENV) == "DEV" {
 		DB.LogMode(true)
 	}
-	return &Database{DB}
+	return &Database{DB: DB, logger: logger}
 }
 
 func (d *Database) MigrateModels() {
@@ -51,14 +52,14 @@ func (d *Database) PopulateConfig() {
 
 	if config.Error != nil {
 		if errors.Is(config.Error, gorm.ErrRecordNotFound) {
-			log.Println("Config not found, creating one")
+			d.logger.Println("Config not found, creating one")
 			config.Result = models.Config{InviteOnly: true}
 			if err := configRepo.Save(&config.Result).Error; err != nil {
-				log.Fatalf("Error creating config: %v", err)
+				d.logger.Fatalf("Error creating config: %v", err)
 			}
 		} else {
-			log.Fatalf("Error querying config: %v", config.Error)
+			d.logger.Fatalf("Error querying config: %v", config.Error)
 		}
 	}
-	log.Printf("Server started with config:\n%s", config.Result.ToString())
+	d.logger.Printf("Server started with config:\n%s", config.Result.ToString())
 }
