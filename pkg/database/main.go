@@ -18,7 +18,6 @@ type Database struct {
 }
 
 func ConnectDatabase() *Database {
-
 	db_driver := env.GetEnv(env.DB_DRIVER)
 	db_host := env.GetEnv(env.DB_HOST)
 	db_user := env.GetEnv(env.DB_USER)
@@ -33,9 +32,12 @@ func ConnectDatabase() *Database {
 	if err != nil {
 		log.Fatal("database connection error:", err)
 	} else {
-		fmt.Println("database connection successfull", db_driver)
+		fmt.Println("database connection successfull:", db_driver)
 	}
 
+	if env.GetEnv(env.APP_ENV) != "PRODUCTION" {
+		DB.LogMode(true)
+	}
 	return &Database{DB}
 }
 

@@ -16,4 +16,7 @@ go build -o planet-registry-bin cmd/main.go
 
 # run the build
 ./planet-registry-bin
+
+# Running tests
+go test -v ./tests/...
 ```
