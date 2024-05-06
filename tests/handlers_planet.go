@@ -20,7 +20,7 @@ func serializeBody(body interface{}) *bytes.Buffer {
 	return &b
 }
 
-func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithPreExistingUsername() {
+func (suite *HandlersTestSuite) TestPlanetsPostHandlerWithPreExistingUsername() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
 	suite.ctx.PlanetRepository.Save(&models.Planet{PlanetId: "earth", Password: "password"})
@@ -31,7 +31,7 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithPreExistingUsername() 
 	assert.Equal(suite.T(), 409, w.Code)
 }
 
-func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithValidInviteAndInviteOnlySetToTrue() {
+func (suite *HandlersTestSuite) TestPlanetsPostHandlerWithValidInviteAndInviteOnlySetToTrue() {
 	suite.ctx.ConfigRepository.Save(&models.Config{Model: gorm.Model{ID: 1}, InviteOnly: true})
 	suite.ctx.InviteRepository.Save(&models.Invite{Code: "welcome"})
 	w := httptest.NewRecorder()
@@ -47,7 +47,7 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithValidInviteAndInviteOn
 	assert.Nil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
 }
 
-func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInviteOnlySetToTrue() {
+func (suite *HandlersTestSuite) TestPlanetsPostHandlerWithInvalidInviteAndInviteOnlySetToTrue() {
 	suite.ctx.ConfigRepository.Save(&models.Config{Model: gorm.Model{ID: 1}, InviteOnly: true})
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
@@ -61,7 +61,7 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInvite
 	assert.NotNil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
 }
 
-func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInviteOnlySetToFalse() {
+func (suite *HandlersTestSuite) TestPlanetsPostHandlerWithInvalidInviteAndInviteOnlySetToFalse() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
 	body := serializeBody(gin.H{"planetId": "earth", "password": "password", "code": "welcome"})
@@ -74,7 +74,7 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInvite
 	assert.Nil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
 }
 
-func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithInvalidUsername() {
+func (suite *HandlersTestSuite) TestPlanetsPostLoginHandlerWithInvalidUsername() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
 	body := serializeBody(gin.H{"planetId": "earth", "password": "password"})
@@ -86,7 +86,7 @@ func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithInvalidUsername()
 	assert.Equal(suite.T(), 404, w.Code)
 }
 
-func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithValidPassword() {
+func (suite *HandlersTestSuite) TestPlanetsPostLoginHandlerWithValidPassword() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
 	suite.ctx.PlanetRepository.Save(&models.Planet{PlanetId: "earth", Password: "password"})
@@ -99,7 +99,7 @@ func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithValidPassword() {
 	assert.Equal(suite.T(), 200, w.Code)
 }
 
-func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithInvalidPassword() {
+func (suite *HandlersTestSuite) TestPlanetsPostLoginHandlerWithInvalidPassword() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
 	suite.ctx.PlanetRepository.Save(&models.Planet{PlanetId: "earth", Password: "password"})
