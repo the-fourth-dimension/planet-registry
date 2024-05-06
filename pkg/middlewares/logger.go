@@ -9,7 +9,6 @@ import (
 
 func LoggerMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
 		start := time.Now()
 		ctx.Next()
 		end := time.Now()
@@ -27,6 +26,5 @@ func LoggerMiddleware() gin.HandlerFunc {
 			method,
 			ctx.Request.URL.Path,
 		)
-
 	}
 }

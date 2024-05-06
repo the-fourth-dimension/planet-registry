@@ -32,3 +32,17 @@ func TestMiddlewares(t *testing.T) {
 	suite.Run(t, &MiddlewareTestSuite{db: db, router: router})
 	db.DB.Close()
 }
+
+func TestHandlers(t *testing.T) {
+	logger := log.Default()
+	var buf bytes.Buffer
+	logger.SetOutput(&buf)
+	env.LoadEnv()
+	db := database.ConnectDatabase(logger)
+	ctx := repositories.NewContext(db.DB, logger)
+	router := routes.NewRouter(ctx)
+	router.RegisterMiddlewares()
+	router.RegisterRoutes()
+	suite.Run(t, &HandlersTestSuite{db: db, router: router, ctx: ctx})
+	db.DB.Close()
+}

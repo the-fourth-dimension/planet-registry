@@ -21,7 +21,7 @@ type planetsHandler struct {
 }
 
 func (h *planetsHandler) RegisterRouter() {
-	auth := h.router.Group("/planet")
+	auth := h.router.Group("/planets")
 	auth.POST("/", h.post)
 	auth.POST("/login", h.postLogin)
 }
