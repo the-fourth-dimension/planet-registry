@@ -25,6 +25,10 @@ func AdminMiddleware(a *repositories.AdminRepository) gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		if role < 1 {
+			ctx.Next()
+			return
+		}
 		username := ctx.GetString("username")
 
 		findQuery := models.Admin{Username: username}
