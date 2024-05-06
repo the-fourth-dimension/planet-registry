@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/the_fourth_dimension/planet_registry/pkg/errors/HttpError"
-	"github.com/the_fourth_dimension/planet_registry/pkg/lib/jwt"
+	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
 	"github.com/the_fourth_dimension/planet_registry/pkg/roles"
 )
 
@@ -24,7 +24,7 @@ func AuthMiddleware() func(*gin.Context) {
 			return
 		}
 		tokenString = tokenString[len("Bearer "):]
-		claims, err := jwt.VerifyJwt(tokenString)
+		claims, err := lib.VerifyJwt(tokenString)
 		if err != nil {
 			ctx.Error(HttpError.NewHttpError("Invalid jwt token", tokenString, http.StatusForbidden))
 			ctx.Abort()

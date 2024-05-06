@@ -1,27 +1,32 @@
 package tests
 
 import (
-	"os"
+	"bytes"
+	"log"
 	"testing"
 
-	"net/http"
-	"net/http/httptest"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/suite"
 	"github.com/the_fourth_dimension/planet_registry/pkg/database"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
+	"github.com/the_fourth_dimension/planet_registry/pkg/middlewares"
+	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 	"github.com/the_fourth_dimension/planet_registry/pkg/routes"
 )
 
-func TestHealthRoute(t *testing.T) {
-	os.Setenv("APP_ENV", "TEST")
+func testHandler(ctx *gin.Context) {
+	ctx.Status(200)
+}
+
+func TestMiddlewares(t *testing.T) {
+	logger := log.Default()
+	var buf bytes.Buffer
+	logger.SetOutput(&buf)
 	env.LoadEnv()
-	db := database.ConnectDatabase()
-	router := routes.NewRouter(db.DB)
-	router.RegisterMiddlewares()
-	router.RegisterRoutes()
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/", nil)
-	router.Engine.ServeHTTP(w, req)
-	assert.Equal(t, 200, w.Code)
+	db := database.ConnectDatabase(logger)
+	ctx := repositories.NewContext(db.DB, logger)
+	router := routes.NewRouter(ctx)
+	router.Engine.GET("/auth", middlewares.ErrorMiddleware(), middlewares.AuthMiddleware(), testHandler)
+	suite.Run(t, &MiddlewareTestSuite{db: db, router: router})
+	db.DB.Close()
 }

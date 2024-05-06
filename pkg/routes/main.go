@@ -2,13 +2,13 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
+	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
 )
 
 type Router struct {
 	Engine *gin.Engine
-	DB     *gorm.DB
+	ctx    *repositories.Context
 }
 
 var appEnvToGinMode = map[string]string{
@@ -17,10 +17,10 @@ var appEnvToGinMode = map[string]string{
 	"PRODUCTION": gin.ReleaseMode,
 }
 
-func NewRouter(db *gorm.DB) *Router {
+func NewRouter(ctx *repositories.Context) *Router {
 	gin.SetMode(appEnvToGinMode[env.GetEnv(env.APP_ENV)])
 	return &Router{
-		Engine: gin.Default(),
-		DB:     db,
+		Engine: gin.New(),
+		ctx:    ctx,
 	}
 }
