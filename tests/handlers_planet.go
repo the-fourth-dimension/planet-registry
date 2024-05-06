@@ -46,3 +46,17 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithValidInviteAndInviteOn
 	assert.Equal(suite.T(), len(suite.ctx.InviteRepository.Find(&models.Invite{}).Result), 0)
 	assert.Nil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
 }
+
+func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInviteOnlySetToTrue() {
+	suite.ctx.ConfigRepository.Save(&models.Config{Model: gorm.Model{ID: 1}, InviteOnly: true})
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
+	body := serializeBody(gin.H{"planetId": "earth", "password": "password", "code": "welcome"})
+	req, _ := http.NewRequest("POST", "/planets/", body)
+	req.Header.Set("Authorization", makeAuthHeader(token))
+
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 400, w.Code)
+	assert.NotNil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
+}
