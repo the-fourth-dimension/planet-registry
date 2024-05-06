@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"github.com/the_fourth_dimension/planet_registry/pkg/env"
@@ -32,7 +31,7 @@ func ConnectDatabase() *Database {
 	if err != nil {
 		log.Fatal("database connection error:", err)
 	} else {
-		fmt.Println("database connection successfull:", db_driver)
+		log.Println("database connection successfull:", db_driver)
 	}
 
 	if env.GetEnv(env.APP_ENV) != "PRODUCTION" {
@@ -61,6 +60,5 @@ func (d *Database) PopulateConfig() {
 			log.Fatalf("Error querying config: %v", config.Error)
 		}
 	}
-	log.Printf("Server started with config:\n")
-	spew.Dump(config.Result)
+	log.Printf("Server started with config:\n%s", config.Result.ToString())
 }

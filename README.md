@@ -6,17 +6,17 @@ planet registry for the hyperspace
 
 ```sh
 # setup env vars
-cp .env.example .env
+cp .env.example .env[filename according to the environment]
 
-# run the planet-registry dev server
-go run cmd/main.go
+# run dev server
+make dev
 
-# build the planet-registry server
-go build -o planet-registry-bin cmd/main.go
+# generate build
+make build
 
-# run the build
-./planet-registry-bin
+# run build server
+make run
 
-# Running tests
-go test -v ./tests/...
+# run tests
+make test
 ```
