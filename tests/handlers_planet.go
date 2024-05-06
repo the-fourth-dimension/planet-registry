@@ -60,3 +60,16 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInvite
 	assert.Equal(suite.T(), 400, w.Code)
 	assert.NotNil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
 }
+
+func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInviteOnlySetToFalse() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
+	body := serializeBody(gin.H{"planetId": "earth", "password": "password", "code": "welcome"})
+	req, _ := http.NewRequest("POST", "/planets/", body)
+	req.Header.Set("Authorization", makeAuthHeader(token))
+
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 201, w.Code)
+	assert.Nil(suite.T(), suite.ctx.PlanetRepository.FindFirst(&models.Planet{PlanetId: "earth"}).Error)
+}
