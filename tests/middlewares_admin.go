@@ -21,3 +21,15 @@ func (suite *MiddlewareTestSuite) TestAdminMiddlewareWithAnInferiorRoleValue() {
 	suite.router.Engine.ServeHTTP(w, req)
 	assert.Equal(suite.T(), 401, w.Code)
 }
+
+func (suite *MiddlewareTestSuite) TestAdminMiddlewareWithValidRoleValueAndInvalidUsername() {
+	token, err := lib.SignJwt(j.MapClaims{"role": 1, "username": "probablyarth"})
+	if err != nil {
+		log.Panic("an error occurred while signing the token ", err)
+	}
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/admin", nil)
+	req.Header.Set("Authorization", makeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	assert.Equal(suite.T(), 403, w.Code)
+}
