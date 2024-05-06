@@ -77,11 +77,24 @@ func (suite *HandlersTestSuite) TestPostPlanetsHandlerWithInvalidInviteAndInvite
 func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithInvalidUsername() {
 	w := httptest.NewRecorder()
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
-	body := serializeBody(gin.H{"planetId": "earth", "password": "password", "code": "welcome"})
+	body := serializeBody(gin.H{"planetId": "earth", "password": "password"})
 	req, _ := http.NewRequest("POST", "/planets/login", body)
 	req.Header.Set("Authorization", makeAuthHeader(token))
 
 	suite.router.Engine.ServeHTTP(w, req)
 
 	assert.Equal(suite.T(), 404, w.Code)
+}
+
+func (suite *HandlersTestSuite) TestPostLoginPlanetsHandlerWithValidPassword() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 2})
+	suite.ctx.PlanetRepository.Save(&models.Planet{PlanetId: "earth", Password: "password"})
+	body := serializeBody(gin.H{"planetId": "earth", "password": "password"})
+	req, _ := http.NewRequest("POST", "/planets/login", body)
+	req.Header.Set("Authorization", makeAuthHeader(token))
+
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 200, w.Code)
 }
