@@ -173,6 +173,39 @@ func (suite *InvitesHandlersTestSuite) TearDownTest() {
 	suite.db.DB.DropTable(&models.Admin{}, &models.Config{}, &models.Invite{}, &models.Planet{})
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithNoIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/invites/", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithIdParamOfNonIntegerDatatype() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/invites/arth", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithNonExistingIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/invites/1", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
+}
+
 type InvitesHandlersTestSuite struct {
 	suite.Suite
 	router *routes.Router
