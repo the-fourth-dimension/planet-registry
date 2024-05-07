@@ -95,6 +95,18 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPostWithPreExistingCode() {
 	assert.Equal(suite.T(), 409, w.Code)
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesPostWithInvalidCodeLength() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("POST", "/invites/", lib.SerializeBody(gin.H{"code": "wel"}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedInvites []models.Invite
+	json.Unmarshal(bodyBytes, &receivedInvites)
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
 func (suite *InvitesHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
