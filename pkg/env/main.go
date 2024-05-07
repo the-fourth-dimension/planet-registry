@@ -40,7 +40,6 @@ var envs = map[string]string{
 }
 
 func LoadEnv() {
-
 	_, isPresent := os.LookupEnv(keys[APP_ENV])
 	if !isPresent {
 		err := os.Setenv(keys[APP_ENV], "DEV")
