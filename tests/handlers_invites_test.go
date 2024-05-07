@@ -117,6 +117,52 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPostWithValidCodeLength() {
 	assert.True(suite.T(), suite.ctx.InviteRepository.FindFirst(&models.Invite{Code: "welcome"}).Error == nil)
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesDeleteIdWithNoIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/invites/", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesDeleteIdWithIdParamOfNonIntegerDatatype() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/invites/arth", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesDeleteIdWithNonExistingIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/invites/1", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesDeleteIdWithValidIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/invites/1", nil)
+	suite.ctx.InviteRepository.Save(&models.Invite{Code: "welcome"})
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.True(suite.T(), suite.ctx.InviteRepository.FindFirst(&models.Invite{Model: gorm.Model{ID: 1}}).Error != nil)
+	assert.Equal(suite.T(), 204, w.Code)
+}
+
 func (suite *InvitesHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
