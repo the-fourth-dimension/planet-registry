@@ -127,6 +127,20 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithDifferentPassword() {
 	assert.Equal(suite.T(), 202, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithDifferentUsername() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	suite.ctx.AdminRepository.Save(&models.Admin{Username: "probablyarth", Password: "password"})
+	newUsername := "definitelyarth"
+	req, _ := http.NewRequest("PUT", "/admins/1", lib.SerializeBody(gin.H{"username": newUsername}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), newUsername, suite.ctx.AdminRepository.FindFirst(&models.Admin{Model: gorm.Model{ID: 1}}).Result.Username)
+	assert.Equal(suite.T(), 202, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
