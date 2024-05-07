@@ -80,6 +80,18 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithNoIdParam() {
 	assert.Equal(suite.T(), 404, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithIdParamOfNonIntegerDatatype() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	req, _ := http.NewRequest("PUT", "/admins/arth", body)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
