@@ -101,6 +101,18 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithNonExistingIdParam() {
 	assert.Equal(suite.T(), 404, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithEmptyJsonBody() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	suite.ctx.AdminRepository.Save(&models.Admin{Username: "probablyarth", Password: "password"})
+	req, _ := http.NewRequest("PUT", "/admins/1", lib.SerializeBody(gin.H{}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 204, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
