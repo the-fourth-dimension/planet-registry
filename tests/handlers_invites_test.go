@@ -217,6 +217,18 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithInvalidCodeLength() {
 	assert.Equal(suite.T(), 400, w.Code)
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithValidCode() {
+	w := httptest.NewRecorder()
+	suite.ctx.InviteRepository.Save(&models.Invite{Code: "welcome"})
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/invites/1", lib.SerializeBody(gin.H{"code": "welcome2"}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 202, w.Code)
+	assert.True(suite.T(), suite.ctx.InviteRepository.FindFirst(&models.Invite{Code: "welcome2"}).Error == nil)
+}
+
 type InvitesHandlersTestSuite struct {
 	suite.Suite
 	router *routes.Router
