@@ -56,6 +56,18 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPostWithPreExistingUsername() {
 	assert.Equal(suite.T(), 409, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsPostWithValidUsername() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	body := serializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	req, _ := http.NewRequest("POST", "/admins/", body)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 201, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
