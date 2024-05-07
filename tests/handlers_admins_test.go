@@ -72,8 +72,7 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithNoIdParam() {
 	w := httptest.NewRecorder()
 
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
-	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
-	req, _ := http.NewRequest("PUT", "/admins/", body)
+	req, _ := http.NewRequest("PUT", "/admins/", nil)
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
 
@@ -84,12 +83,22 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithIdParamOfNonIntegerData
 	w := httptest.NewRecorder()
 
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
-	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
-	req, _ := http.NewRequest("PUT", "/admins/arth", body)
+	req, _ := http.NewRequest("PUT", "/admins/arth", nil)
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
 
 	assert.Equal(suite.T(), 400, w.Code)
+}
+
+func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithNonExistingIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/admins/1", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
 }
 
 func (suite *AdminsHandlersTestSuite) SetupTest() {
