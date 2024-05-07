@@ -47,7 +47,7 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPostWithPreExistingUsername() {
 	w := httptest.NewRecorder()
 
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
-	body := serializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
 	req, _ := http.NewRequest("POST", "/admins/", body)
 	suite.ctx.AdminRepository.Save(&models.Admin{Username: "probablyarth", Password: "Password"})
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
@@ -60,12 +60,24 @@ func (suite *AdminsHandlersTestSuite) TestAdminsPostWithValidUsername() {
 	w := httptest.NewRecorder()
 
 	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
-	body := serializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
 	req, _ := http.NewRequest("POST", "/admins/", body)
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
 
 	assert.Equal(suite.T(), 201, w.Code)
+}
+
+func (suite *AdminsHandlersTestSuite) TestAdminsPutIdWithNoIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	body := lib.SerializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	req, _ := http.NewRequest("PUT", "/admins/", body)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
 }
 
 func (suite *AdminsHandlersTestSuite) SetupTest() {
