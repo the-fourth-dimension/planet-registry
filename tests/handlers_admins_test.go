@@ -1,0 +1,74 @@
+package tests
+
+import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/jinzhu/gorm"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"github.com/the_fourth_dimension/planet_registry/pkg/database"
+	"github.com/the_fourth_dimension/planet_registry/pkg/env"
+	"github.com/the_fourth_dimension/planet_registry/pkg/lib"
+	"github.com/the_fourth_dimension/planet_registry/pkg/models"
+	"github.com/the_fourth_dimension/planet_registry/pkg/repositories"
+	"github.com/the_fourth_dimension/planet_registry/pkg/routes"
+)
+
+func (suite *AdminsHandlersTestSuite) TestAdminsGet() {
+	w := httptest.NewRecorder()
+	jsonFile, _ := os.Open("./mock_data/admins.json")
+	byteValue, _ := io.ReadAll(jsonFile)
+	var admins []models.Admin
+	json.Unmarshal(byteValue, &admins)
+	for _, admin := range admins {
+		suite.ctx.AdminRepository.Save(&admin)
+	}
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("GET", "/admins/", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedAdmins []models.Admin
+	json.Unmarshal(bodyBytes, &receivedAdmins)
+	assert.Equal(suite.T(), 200, w.Code)
+	assert.Equal(suite.T(), len(admins), len(receivedAdmins))
+}
+
+func (suite *AdminsHandlersTestSuite) SetupTest() {
+	suite.db.MigrateModels()
+	suite.db.PopulateConfig()
+	suite.ctx.ConfigRepository.Save(&models.Config{Model: gorm.Model{ID: 1}, InviteOnly: false})
+}
+
+func (suite *AdminsHandlersTestSuite) TearDownTest() {
+	suite.db.DB.DropTable(&models.Admin{}, &models.Config{}, &models.Invite{}, &models.Planet{})
+}
+
+type AdminsHandlersTestSuite struct {
+	suite.Suite
+	router *routes.Router
+	db     *database.Database
+	ctx    *repositories.Context
+}
+
+func TestAdminHandlers(t *testing.T) {
+	logger := log.Default()
+	var buf bytes.Buffer
+	logger.SetOutput(&buf)
+	env.LoadEnv()
+	db := database.ConnectDatabase(logger)
+	ctx := repositories.NewContext(db.DB, logger)
+	router := routes.NewRouter(ctx)
+	router.RegisterMiddlewares()
+	router.RegisterRoutes()
+	suite.Run(t, &AdminsHandlersTestSuite{db: db, router: router, ctx: ctx})
+	db.DB.Close()
+}
