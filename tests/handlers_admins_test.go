@@ -163,6 +163,17 @@ func (suite *AdminsHandlersTestSuite) TestAdminsDeleteIdWithIdParamOfNonIntegerD
 	assert.Equal(suite.T(), 400, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsDeleteIdWithNonExistingIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/admins/1", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 404, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
