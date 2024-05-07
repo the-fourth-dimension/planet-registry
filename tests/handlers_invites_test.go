@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -73,6 +74,25 @@ func (suite *InvitesHandlersTestSuite) TestInvitesGetWithExistingCodeQuery() {
 	json.Unmarshal(bodyBytes, &receivedInvites)
 	assert.Equal(suite.T(), 200, w.Code)
 	assert.Equal(suite.T(), 1, len(receivedInvites))
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesPostWithPreExistingCode() {
+	w := httptest.NewRecorder()
+	jsonFile, _ := os.Open("./mock_data/invites.json")
+	byteValue, _ := io.ReadAll(jsonFile)
+	var invites []models.Invite
+	json.Unmarshal(byteValue, &invites)
+	for _, invite := range invites {
+		suite.ctx.InviteRepository.Save(&invite)
+	}
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("POST", "/invites/", lib.SerializeBody(gin.H{"code": "welcome"}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedInvites []models.Invite
+	json.Unmarshal(bodyBytes, &receivedInvites)
+	assert.Equal(suite.T(), 409, w.Code)
 }
 
 func (suite *InvitesHandlersTestSuite) SetupTest() {
