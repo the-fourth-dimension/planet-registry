@@ -174,6 +174,19 @@ func (suite *AdminsHandlersTestSuite) TestAdminsDeleteIdWithNonExistingIdParam()
 	assert.Equal(suite.T(), 404, w.Code)
 }
 
+func (suite *AdminsHandlersTestSuite) TestAdminsDeleteIdWithValidIdParam() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("DELETE", "/admins/1", nil)
+	suite.ctx.AdminRepository.Save(&models.Admin{Username: "probablyarth", Password: "password"})
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.True(suite.T(), suite.ctx.AdminRepository.FindFirst(&models.Admin{Model: gorm.Model{ID: 1}}).Error != nil)
+	assert.Equal(suite.T(), 204, w.Code)
+}
+
 func (suite *AdminsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
