@@ -42,6 +42,19 @@ func (suite *InvitesHandlersTestSuite) TestInvitesGetWithNoCodeQuery() {
 	assert.Equal(suite.T(), len(invites), len(receivedInvites))
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesGetWithNonExistingCodeQuery() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("GET", "/invites/?code=noob", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedInvites []models.Invite
+	json.Unmarshal(bodyBytes, &receivedInvites)
+	assert.Equal(suite.T(), 200, w.Code)
+	assert.Equal(suite.T(), 0, len(receivedInvites))
+}
+
 func (suite *InvitesHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
