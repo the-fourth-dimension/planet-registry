@@ -89,9 +89,6 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPostWithPreExistingCode() {
 	req, _ := http.NewRequest("POST", "/invites/", lib.SerializeBody(gin.H{"code": "welcome"}))
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
-	bodyBytes, _ := io.ReadAll(w.Result().Body)
-	var receivedInvites []models.Invite
-	json.Unmarshal(bodyBytes, &receivedInvites)
 	assert.Equal(suite.T(), 409, w.Code)
 }
 
@@ -101,10 +98,23 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPostWithInvalidCodeLength() {
 	req, _ := http.NewRequest("POST", "/invites/", lib.SerializeBody(gin.H{"code": "wel"}))
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
-	bodyBytes, _ := io.ReadAll(w.Result().Body)
-	var receivedInvites []models.Invite
-	json.Unmarshal(bodyBytes, &receivedInvites)
 	assert.Equal(suite.T(), 400, w.Code)
+}
+
+func (suite *InvitesHandlersTestSuite) TestInvitesPostWithValidCodeLength() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("POST", "/invites/", lib.SerializeBody(gin.H{"code": "welcome"}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedInvite struct {
+		Id int `json:"id"`
+	}
+	json.Unmarshal(bodyBytes, &receivedInvite)
+	assert.Equal(suite.T(), 201, w.Code)
+	assert.Equal(suite.T(), 1, receivedInvite.Id)
+	assert.True(suite.T(), suite.ctx.InviteRepository.FindFirst(&models.Invite{Code: "welcome"}).Error == nil)
 }
 
 func (suite *InvitesHandlersTestSuite) SetupTest() {
