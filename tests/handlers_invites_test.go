@@ -206,6 +206,17 @@ func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithNonExistingIdParam() 
 	assert.Equal(suite.T(), 404, w.Code)
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesPutIdWithInvalidCodeLength() {
+	w := httptest.NewRecorder()
+	suite.ctx.InviteRepository.Save(&models.Invite{Code: "welcome"})
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/invites/1", lib.SerializeBody(gin.H{"code": "wel"}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
 type InvitesHandlersTestSuite struct {
 	suite.Suite
 	router *routes.Router
