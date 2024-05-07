@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -40,6 +41,19 @@ func (suite *AdminsHandlersTestSuite) TestAdminsGet() {
 	json.Unmarshal(bodyBytes, &receivedAdmins)
 	assert.Equal(suite.T(), 200, w.Code)
 	assert.Equal(suite.T(), len(admins), len(receivedAdmins))
+}
+
+func (suite *AdminsHandlersTestSuite) TestAdminsPostWithPreExistingUsername() {
+	w := httptest.NewRecorder()
+
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	body := serializeBody(gin.H{"username": "probablyarth", "password": "password"})
+	req, _ := http.NewRequest("POST", "/admins/", body)
+	suite.ctx.AdminRepository.Save(&models.Admin{Username: "probablyarth", Password: "Password"})
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), 409, w.Code)
 }
 
 func (suite *AdminsHandlersTestSuite) SetupTest() {
