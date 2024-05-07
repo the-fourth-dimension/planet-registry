@@ -55,6 +55,26 @@ func (suite *InvitesHandlersTestSuite) TestInvitesGetWithNonExistingCodeQuery() 
 	assert.Equal(suite.T(), 0, len(receivedInvites))
 }
 
+func (suite *InvitesHandlersTestSuite) TestInvitesGetWithExistingCodeQuery() {
+	w := httptest.NewRecorder()
+	jsonFile, _ := os.Open("./mock_data/invites.json")
+	byteValue, _ := io.ReadAll(jsonFile)
+	var invites []models.Invite
+	json.Unmarshal(byteValue, &invites)
+	for _, invite := range invites {
+		suite.ctx.InviteRepository.Save(&invite)
+	}
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("GET", "/invites/?code=welcome", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	bodyBytes, _ := io.ReadAll(w.Result().Body)
+	var receivedInvites []models.Invite
+	json.Unmarshal(bodyBytes, &receivedInvites)
+	assert.Equal(suite.T(), 200, w.Code)
+	assert.Equal(suite.T(), 1, len(receivedInvites))
+}
+
 func (suite *InvitesHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
