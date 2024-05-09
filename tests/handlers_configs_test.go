@@ -61,6 +61,15 @@ func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithNoConfigsRecord() {
 	suite.router.Engine.ServeHTTP(w, req)
 }
 
+func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithInvalidPayload() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/configs/", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	assert.Equal(suite.T(), 400, w.Code)
+}
+
 func (suite *ConfigsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
