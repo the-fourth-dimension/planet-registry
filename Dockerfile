@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine
+FROM golang:1.22.2-alpine
 
 RUN apk add g++ && apk add make
 
