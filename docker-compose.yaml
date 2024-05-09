@@ -1,0 +1,31 @@
+services:
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: planet-registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  planet-registry:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: DEV
+      DB_DRIVER: postgres
+      DB_HOST: postgres_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: planet-registry
+      DB_PORT: 5432
+      JWT_SECRET: some-key
+    depends_on:
+      - postgres_db
+
+volumes:
+  pgdata: {}
