@@ -35,7 +35,7 @@ jobs:
         run: make test
         env:
           JWT_SECRET: secret
-          DB_HOST: postgres
+          DB_HOST: postgresql
           DB_USER: postgres
           DB_PASSWORD: postgres
           DB_NAME: planet-registry
