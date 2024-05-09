@@ -5,7 +5,7 @@ dev:
 build:
 	go build -o planet-registry-bin cmd/main.go
 
-run: build
+run:
 	export APP_ENV=PRODUCTION;\
 	./planet-registry-bin
 
