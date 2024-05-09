@@ -1,0 +1,44 @@
+name: Test
+
+on: [pull_request]
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: planet-registry
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      # run steps required in the workflow
+      - uses: actions/checkout@v4
+      - name: Setup Go 1.22.2
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.2
+      # You can test your matrix by printing the current Go version
+      - name: Run tests
+        run: make test
+        env:
+          JWT_SECRET: secret
+          DB_HOST: postgres
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: planet-registry
+          DB_PORT: 5432
+          DB_DRIVER: postgres
+          PORT: 8000
