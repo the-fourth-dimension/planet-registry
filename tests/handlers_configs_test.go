@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -68,6 +69,15 @@ func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithInvalidPayload() {
 	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
 	suite.router.Engine.ServeHTTP(w, req)
 	assert.Equal(suite.T(), 400, w.Code)
+}
+
+func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithNothingToChangePayload() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/configs/", lib.SerializeBody(gin.H{"inviteOnly": false}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	assert.Equal(suite.T(), 204, w.Code)
 }
 
 func (suite *ConfigsHandlersTestSuite) SetupTest() {
