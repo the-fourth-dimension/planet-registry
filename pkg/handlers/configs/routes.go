@@ -43,7 +43,7 @@ func (h *configsHandler) put(ctx *gin.Context) {
 		return
 	}
 	changed := false
-	if input.InviteOnly != nil {
+	if input.InviteOnly != nil && *input.InviteOnly != findConfigResult.Result.InviteOnly {
 		findConfigResult.Result.InviteOnly = *input.InviteOnly
 		changed = true
 	}
