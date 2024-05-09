@@ -80,6 +80,16 @@ func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithNothingToChangePayload(
 	assert.Equal(suite.T(), 204, w.Code)
 }
 
+func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithInviteOnlyChangedPayload() {
+	w := httptest.NewRecorder()
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/configs/", lib.SerializeBody(gin.H{"inviteOnly": true}))
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	suite.router.Engine.ServeHTTP(w, req)
+	assert.Equal(suite.T(), 202, w.Code)
+	assert.True(suite.T(), suite.ctx.ConfigRepository.FindFirst(&models.Config{Model: gorm.Model{ID: 1}}).Result.InviteOnly)
+}
+
 func (suite *ConfigsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
