@@ -48,6 +48,19 @@ func (suite *ConfigsHandlersTestSuite) TestConfigsGetWithValidConfigsRecord() {
 	assert.Equal(suite.T(), uint(1), receivedConfig.Config.ID)
 }
 
+func (suite *ConfigsHandlersTestSuite) TestConfigsPutWithNoConfigsRecord() {
+	w := httptest.NewRecorder()
+	suite.db.DB.Delete(&models.Config{Model: gorm.Model{ID: 1}})
+	token, _ := lib.SignJwt(jwt.MapClaims{"role": 0})
+	req, _ := http.NewRequest("PUT", "/configs/", nil)
+	req.Header.Set("Authorization", lib.MakeAuthHeader(token))
+	defer func() {
+		r := recover()
+		assert.NotNil(suite.T(), r)
+	}()
+	suite.router.Engine.ServeHTTP(w, req)
+}
+
 func (suite *ConfigsHandlersTestSuite) SetupTest() {
 	suite.db.MigrateModels()
 	suite.db.PopulateConfig()
